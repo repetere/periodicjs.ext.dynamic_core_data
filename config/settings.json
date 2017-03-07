@@ -1,0 +1,12 @@
+{
+	"development":{
+		"settings":{
+			"unpublished_content_interval":"1 * * * * *"
+		}
+	},
+	"test":{
+		"settings":{
+			"unpublished_content_interval":"1 * * * * *"
+		}
+	}
+}
