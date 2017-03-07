@@ -2,15 +2,15 @@
 
 **Modules**
 
-* [periodicjs.ext.scheduled_content](#periodicjs.ext.module_scheduled_content)
+* [periodicjs.ext.serverside_ra](#periodicjs.ext.module_serverside_ra)
 
 **Functions**
 
 * [publishScheduledItemCollectionss()](#publishScheduledItemCollectionss)
   * [publishScheduledItemCollectionss~updateScheduledContent(model, callback)](#publishScheduledItemCollectionss..updateScheduledContent)
  
-<a name="periodicjs.ext.module_scheduled_content"></a>
-#periodicjs.ext.scheduled_content
+<a name="periodicjs.ext.module_serverside_ra"></a>
+#periodicjs.ext.serverside_ra
 An extension that uses cron to periodically check for unpublished posts to publish.
 
 **Params**

@@ -98,11 +98,11 @@ var publishScheduledItemCollectionss = function () {
 
 /**
  * An extension that uses cron to periodically check for unpublished posts to publish.
- * @{@link https://github.com/typesettin/periodicjs.ext.scheduled_content}
+ * @{@link https://github.com/typesettin/periodicjs.ext.serverside_ra}
  * @author Yaw Joseph Etse
  * @copyright Copyright (c) 2014 Typesettin. All rights reserved.
  * @license MIT
- * @exports periodicjs.ext.scheduled_content
+ * @exports periodicjs.ext.serverside_ra
  * @requires module:cron
  * @requires module:fs-extra
  * @requires module:path
@@ -119,13 +119,13 @@ module.exports = function (periodic) {
     Compilation = mongoose.model('Compilation');
     CoreExtension = periodic.core.extension;
     
-    var scheduled_content_settingsFile = path.resolve(CoreExtension.getconfigdir({
-        extname: 'periodicjs.ext.scheduled_content'
+    var serverside_ra_settingsFile = path.resolve(CoreExtension.getconfigdir({
+        extname: 'periodicjs.ext.serverside_ra'
     }), './settings.json'),
     appenvironment = appSettings.application.environment,
     scheduledExtSettings;
 
-    fs.readJson(scheduled_content_settingsFile, function (err, settingJSON) {
+    fs.readJson(serverside_ra_settingsFile, function (err, settingJSON) {
         if (err) {
             throw new Error(err);
         }

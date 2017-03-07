@@ -120,11 +120,11 @@ var publishScheduledItemCollectionss = function () {
 
 /**
  * An extension that uses cron to periodically check for unpublished posts to publish.
- * @{@link https://github.com/typesettin/periodicjs.ext.scheduled_content}
+ * @{@link https://github.com/typesettin/periodicjs.ext.serverside_ra}
  * @author Yaw Joseph Etse
  * @copyright Copyright (c) 2014 Typesettin. All rights reserved.
  * @license MIT
- * @exports periodicjs.ext.scheduled_content
+ * @exports periodicjs.ext.serverside_ra
  * @requires module:cron
  * @requires module:fs-extra
  * @requires module:path
@@ -139,13 +139,13 @@ module.exports = function (periodic) {
     Item = mongoose.model('Item');
     Collection = mongoose.model('Collection');
     
-    var scheduled_content_settingsFile = path.resolve(CoreExtension.getconfigdir({
-        extname: 'periodicjs.ext.scheduled_content'
+    var serverside_ra_settingsFile = path.resolve(CoreExtension.getconfigdir({
+        extname: 'periodicjs.ext.serverside_ra'
     }), './settings.json'),
     appenvironment = appSettings.application.environment,
     scheduledExtSettings;
 
-    fs.readJson(scheduled_content_settingsFile, function (err, settingJSON) {
+    fs.readJson(serverside_ra_settingsFile, function (err, settingJSON) {
         if (err) {
             throw new Error(err);
         }
@@ -171,7 +171,7 @@ module.exports = function (periodic) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="scheduled_content.html">scheduled_content</a></li></ul><h3>Global</h3><ul><li><a href="global.html#publishScheduledItemCollectionss">publishScheduledItemCollectionss</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="serverside_ra.html">serverside_ra</a></li></ul><h3>Global</h3><ul><li><a href="global.html#publishScheduledItemCollectionss">publishScheduledItemCollectionss</a></li></ul>
 </nav>
 
 <br clear="both">
