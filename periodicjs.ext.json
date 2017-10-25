@@ -1,7 +1,8 @@
 {
-	"periodicCompatibility":"9.0.0",
-	"periodicDependencies": [{
-			"extname":"periodicjs.ext.reactadmin",
-			"version":"0.8.2"
-	}]
+  "periodic_compatibility": "10.0.0",
+  "periodic_dependencies": [],
+  "periodic_type": 7,
+  "periodic_priority": 0,
+  "periodic_config": {
+  }
 }

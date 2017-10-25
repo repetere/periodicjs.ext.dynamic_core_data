@@ -1,123 +1,67 @@
-/*
- * domhelper
- * http://github.com/yawetse/domhelper
- *
- * Copyright (c) 2014 Yaw Joseph Etse. All rights reserved.
- */
 'use strict';
-var path = require('path');
+
+const path = require('path');
+const testPaths = ['./test/**/*.js',];
 
 module.exports = function (grunt) {
   grunt.initConfig({
-    simplemocha: {
+    mocha_istanbul: {
+      coverage: {
+        src: testPaths, // multiple folders also works
+        reportFormats: ['cobertura', 'lcovonly',],
+      },
+    },
+    istanbul_check_coverage: {
+      default: {
+        options: {
+          coverageFolder: 'coverage', // will check both coverage folders and merge the coverage results
+          check: {
+            lines: 80,
+            branches: 80,
+            functions: 80,
+            statements: 80,
+          },
+        },
+      },
+    },
+    coveralls: {
+    // Options relevant to all targets
       options: {
-        globals: ['should'],
-        timeout: 3000,
-        ignoreLeaks: false,
-        ui: 'bdd',
-        reporter: 'spec'
+        // When true, grunt-coveralls will only print a warning rather than
+        // an error, to prevent CI builds from failing unnecessarily (e.g. if
+        // coveralls.io is down). Optional, defaults to false.
+        force: false,
       },
       all: {
-        src: 'test/**/*.js'
-      }
-    },
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc'
+        // LCOV coverage file (can be string, glob or array)
+        src: 'coverage/*.info',
+        options: {
+          // Any options for just this target
+        },
       },
-      all: [
-        'Gruntfile.js',
-        'index.js',
-        'controller/**/*.js',
-        'resources/**/*.js',
-        'test/**/*.js',
-      ]
     },
-    jsbeautifier: {
-      files: ['<%= jshint.all %>'],
+    simplemocha: {
       options: {
-        config: '.jsbeautify'
-      }
+        globals: ['should', 'navigator', 'x',],
+        timeout: 3000,
+        ignoreLeaks: true,
+        ui: 'bdd',
+        reporter: 'spec',
+      },
+      all: {
+        src: testPaths,
+      },
     },
     jsdoc: {
       dist: {
-        src: [
-          'index.js',
-          'controller/**/*.js',
-          'resources/**/*.js',
-        ],
+        src: ['lib/**/*.js', 'index.js',],
         options: {
           destination: 'doc/html',
-          configure: 'jsdoc.json'
-        }
-      }
-    },
-    browserify: {
-      dist: {
-        files: [{
-          expand: true,
-          cwd: 'resources',
-          src: ['**/*_src.js'],
-          dest: 'public',
-          rename: function (dest, src) {
-            var finallocation = path.join(dest, src);
-            finallocation = finallocation.replace('_src', '_build');
-            finallocation = finallocation.replace('resources', 'public');
-            finallocation = path.resolve(finallocation);
-            return finallocation;
-          }
-        }],
-        options: {}
-      }
-    },
-    uglify: {
-      options: {
-        sourceMap: true,
-        compress: {
-          drop_console: false
-        }
-      },
-      all: {
-        files: [{
-          expand: true,
-          cwd: 'public',
-          src: ['**/*_build.js'],
-          dest: 'public',
-          rename: function (dest, src) {
-            var finallocation = path.join(dest, src);
-            finallocation = finallocation.replace('_build', '.min');
-            finallocation = path.resolve(finallocation);
-            return finallocation;
-          }
-        }]
-      }
-    },
-    copy: {
-      main: {
-        cwd: 'public',
-        expand: true,
-        src: '**/*.*',
-        dest: '../../public/extensions/periodicjs.ext.login',
+          configure: 'jsdoc.json',
+        },
       },
     },
-    watch: {
-      scripts: {
-        // files: '**/*.js',
-        files: [
-          'Gruntfile.js',
-          'index.js',
-          'controller/**/*.js',
-          'resources/**/*.js',
-          'test/**/*.js',
-        ],
-        tasks: ['lint', 'packagejs', 'copy', /*'doc',*/ 'test'],
-        options: {
-          interrupt: true
-        }
-      }
-    }
   });
-
 
   // Loading dependencies
   for (var key in grunt.file.readJSON('package.json').devDependencies) {
@@ -125,10 +69,7 @@ module.exports = function (grunt) {
       grunt.loadNpmTasks(key);
     }
   }
-
-  grunt.registerTask('default', ['jshint', 'simplemocha']);
-  grunt.registerTask('lint', 'jshint', 'jsbeautifier');
-  grunt.registerTask('packagejs', ['browserify', 'uglify']);
   grunt.registerTask('doc', 'jsdoc');
-  grunt.registerTask('test', 'simplemocha');
+  grunt.registerTask('test', 'mocha_istanbul');
+  grunt.registerTask('default', [/*'lint',*/'test', /*'browserify',*/ 'doc', /*'uglify',*/ ]);
 };
