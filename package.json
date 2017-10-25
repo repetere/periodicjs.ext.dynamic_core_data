@@ -1,13 +1,16 @@
 {
   "name": "periodicjs.ext.dynamic_core_data",
-  "description": "sample extension.",
-  "version": "0.0.1",
+  "description": "Dynamically add databases and models to your periodic application via core data ORM.",
+  "version": "0.0.2",
   "main": "index.js",
   "engines": {
     "node": "^6.x"
   },
   "contributors": [],
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/typesettin/periodicjs.ext.dynamic_core_data.git"
+  },
   "config": {
     "blanket": {
       "pattern": [

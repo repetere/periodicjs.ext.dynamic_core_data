@@ -1,8 +1,8 @@
-# periodicjs.ext.dynamic_core_data [![Coverage Status](https://coveralls.io/repos/github/githubUserOrgName/periodicjs.ext.dynamic_core_data/badge.svg?branch=master)](https://coveralls.io/github/githubUserOrgName/periodicjs.ext.dynamic_core_data?branch=master) [![Build Status](https://travis-ci.org/githubUserOrgName/periodicjs.ext.dynamic_core_data.svg?branch=master)](https://travis-ci.org/githubUserOrgName/periodicjs.ext.dynamic_core_data)
+# periodicjs.ext.dynamic_core_data [![Coverage Status](https://coveralls.io/repos/github/typesettin/periodicjs.ext.dynamic_core_data/badge.svg?branch=master)](https://coveralls.io/github/typesettin/periodicjs.ext.dynamic_core_data?branch=master) [![Build Status](https://travis-ci.org/typesettin/periodicjs.ext.dynamic_core_data.svg?branch=master)](https://travis-ci.org/typesettin/periodicjs.ext.dynamic_core_data)
 
 A simple extension.
 
-[API Documentation](https://github.com/githubUserOrgName/periodicjs.ext.dynamic_core_data/blob/master/doc/api.md)
+[API Documentation](https://github.com/typesettin/periodicjs.ext.dynamic_core_data/blob/master/doc/api.md)
 
 ## Usage
 
