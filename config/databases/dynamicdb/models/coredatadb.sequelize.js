@@ -34,9 +34,29 @@ const scheme = {
   },
 };
 
+const options = {
+  underscored: true,
+  timestamps: true,
+  indexes: [{
+    fields: ['createdat'],
+  }],
+};
+
+const associations = [
+  {
+    source: 'coredatadb',
+    association: 'hasMany',
+    target: 'coredatamodel',
+    options: {
+      as: 'core_data_models',
+    }
+  }
+];  
+
 module.exports = {
   scheme,
-  options: {},
+  options,
+  associations,
   coreDataOptions: {
     sort: { createdat: -1, },
     docid: ['_id','name','database_name'],

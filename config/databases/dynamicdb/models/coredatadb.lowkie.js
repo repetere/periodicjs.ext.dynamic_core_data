@@ -20,6 +20,12 @@ const scheme = {
     password: String,//for sequelize
     connection_options: Schema.Types.Mixed,//for sequelize
   },
+  core_data_models: [
+    {
+      type: ObjectId,
+      ref: 'Coredatamodel',
+    },
+  ],
 };
 
 module.exports = {
@@ -31,6 +37,6 @@ module.exports = {
     sort: { createdat: -1, },
     docid: ['_id','name','database_name'],
     search: ['name', 'title', 'options.dbpath', 'options.url', 'options.database','database_name','description' ],
-    // population: false,
+    population: 'core_data_models',
   },
 };

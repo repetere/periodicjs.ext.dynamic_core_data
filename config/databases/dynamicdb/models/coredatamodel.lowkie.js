@@ -19,9 +19,11 @@ const scheme = {
       field_unique: Boolean,
       field_index: Boolean,
       field_expires: String,
+      field_ref: String,
     }
   ],
   scheme_options: Schema.Types.Mixed,
+  scheme_associations: Schema.Types.Mixed,
   scheme_core_data_options: {
     sort: Schema.Types.Mixed,
     docid: Schema.Types.Mixed,

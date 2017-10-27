@@ -26,11 +26,11 @@ module.exports = (periodic) => {
               label: 'Manage Databases',
               id: 'dcd-manage-databases',
             },
-            {
-              href: `${reactapp.manifest_prefix}ext/dcd/manage-models`,
-              label: 'Manage Models',
-              id: 'dcd-manage-models',
-            },
+            // {
+            //   href: `${reactapp.manifest_prefix}ext/dcd/manage-models`,
+            //   label: 'Manage Models',
+            //   id: 'dcd-manage-models',
+            // },
           ]
         }),
       ],

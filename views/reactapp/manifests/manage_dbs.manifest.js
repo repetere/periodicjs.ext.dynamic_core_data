@@ -4,19 +4,18 @@ const periodic = require('periodicjs');
 const reactappLocals = periodic.locals.extensions.get('periodicjs.ext.reactapp');
 const reactapp = reactappLocals.reactapp();
 
-const userRoleForm = (options = {}) => reactappLocals.server_manifest.forms.createForm({
+const newDBForm = (options = {}) => reactappLocals.server_manifest.forms.createForm({
   method: (options.update) ? 'PUT' : 'POST',
-  action: (options.update) 
-    ? `${reactapp.manifest_prefix}contentdata/standard_userroles/:id?format=json`
-    : `${reactapp.manifest_prefix}contentdata/standard_userroles?format=json`,
-  onSubmit:'closeModal',
+  action: (options.update)
+    ? `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs/:id?format=json&unflatten=true&handleupload=true`
+    : `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json&unflatten=true`,
+  onSubmit: 'closeModal',
   onComplete: 'refresh',
   // loadingScreen: true,
   style: {
-    paddingTop:'1rem',
+    paddingTop: '1rem',
   },
-  hiddenFields: [
-  ],
+  hiddenFields: options.hiddenFields,
   validations: [
     {
       field: 'title',
@@ -27,31 +26,22 @@ const userRoleForm = (options = {}) => reactappLocals.server_manifest.forms.crea
       },
     },
     {
-      field: 'userroleid',
+      field: 'database_name',
       constraints: {
         presence: {
-          message: '^Please provide a user role id',
+          message: '^Please provide a database name',
         },
       },
     },
-    
-  ],
+  ].concat(options.validations),
   rows: [
     {
       formElements: [
         {
           type: 'text',
           // placeholder:'Title',
-          label:'Title',
-          name:'title',
-        },
-        {
-          type: 'text',
-          passProps: {
-            type:'number',
-          },
-          label:'User Role ID',
-          name:'userroleid',
+          label: 'Title',
+          name: 'title',
         },
       ],
     },
@@ -59,46 +49,57 @@ const userRoleForm = (options = {}) => reactappLocals.server_manifest.forms.crea
       formElements: [
         {
           type: 'text',
-          name: 'description',
+          // placeholder:'Title',
+          label: 'Database Name',
+          name: 'database_name',
+        },
+      ],
+    },
+    {
+      formElements: [
+        {
+          type: 'text',
+          // placeholder:'Title',
           label: 'Description',
-          // passProps: {
-          //   // multiple:true,
-          // },
+          name: 'description',
         },
       ],
     },
-    {
-      formElements: [
-        {
-          type: 'datalist',
-          name: 'privileges',
-          label: 'Privileges',
-          datalist: {
-            multi: true,
-            // selector: '_id',
-            entity:'standard_userprivilege',
-            resourceUrl:`${reactapp.manifest_prefix}contentdata/standard_userprivileges?format=json`
-          }
-          // passProps: {
-          //   // multiple:true,
-          // },
-        },
-      ],
-    },
-    {
-      formElements: [
-        {
-          type: 'submit',
-          value: (options.update) ? 'Update User Role' : 'Add User Role',
-          layoutProps: {
-            style: {
-              textAlign:'center',
+  ]
+    .concat(options.customDBFields)
+    .concat([
+      {
+        formElements: [
+          {
+            type: 'datalist',
+            name: 'core_data_models',
+            label: 'Database Models',
+            datalist: {
+              multi: true,
+              selector: '_id',
+              entity:'dynamicdb_coredatamodel',
+              resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`
+            }
+            // passProps: {
+            //   // multiple:true,
+            // },
+          },
+        ],
+      },
+      {
+        formElements: [
+          {
+            type: 'submit',
+            value: (options.update) ? 'Update Database' : 'Add Database',
+            layoutProps: {
+              style: {
+                textAlign: 'center',
+              },
             },
           },
-        },
-      ],
-    },
-  ],
+        ],
+      },
+    ]),
   actionParams: (options.update)
     ? [
       {
@@ -110,10 +111,222 @@ const userRoleForm = (options = {}) => reactappLocals.server_manifest.forms.crea
   // hiddenFields
   asyncprops: (options.update)
     ? {
-      formdata: [ 'userroledata', 'data' ],
+      formdata: [ 'databasedata', 'data' ],
+      // formdata: [ 'databasedata', 'data' ],
     }
     : {},
 });
+const lowkieForm = (options = {}) => newDBForm(Object.assign({
+  hiddenFields: [
+    {
+      form_static_val: 'lowkie',
+      form_name: 'type',
+    },
+    {
+      form_val: '_id',
+      form_name: '_id',
+    },
+    {
+      form_val: 'name',
+      form_name: 'name',
+    },
+    {
+      form_val: '$loki',
+      form_name: '$loki',
+    },
+    {
+      form_val: 'meta',
+      form_name: 'meta',
+    },
+  ],
+  customDBFields: [
+    {
+      formElements: [
+        {
+          type: 'text',
+          name: 'options.dbpath',
+          label: 'Database Path',
+          placeholder: 'content/data/customdb/custom_database.json',
+        },
+      ],
+    },
+  ],
+  validations: [
+    // {
+    //   field: 'options.dbpath',
+    //   constraints: {
+    //     presence: {
+    //       message: '^Loki Databases require a path to a json file',
+    //     },
+    //   },
+    // },  
+  ],
+}, options));
+const mongoForm = (options = {}) => newDBForm(Object.assign({
+  hiddenFields: [
+    {
+      form_static_val: 'mongoose',
+      form_name: 'type',
+    },
+  ],
+  customDBFields: [
+    {
+      formElements: [
+        {
+          type: 'text',
+          name: 'options.url',
+          label: 'MongoDB URL',
+          placeholder: 'mongodb://localhost:27017/config_db',
+          // passProps: {
+          //   // multiple:true,
+          // },
+        },
+      ],
+    },
+    {
+      formElements: [
+        {
+          type: 'code',
+          name: 'options.mongoose_options',
+          label: 'Mongoose Options',
+          value: `//{
+//  "replset": { "rs_name": "cd6d32c5781f462b9de19e84fbd40fd0" },
+//  "server":{
+//    "keepAlive": 1,
+//    "connectTimeoutMS": 30000,
+//    "socketTimeoutMS": 30000
+//  }
+//}`,
+          // passProps: {
+          //   // multiple:true,
+          // },
+        },
+      ],
+    },
+  ],
+  validations: [
+    {
+      field: 'options.url',
+      constraints: {
+        presence: {
+          message: '^Mongo Databases require a valid mongo url',
+        },
+      },
+    },
+  ],
+}, options));
+const sqlForm = (options = {}) => newDBForm(Object.assign({
+  hiddenFields: [
+    {
+      form_static_val: 'sequelize',
+      form_name: 'type',
+    },
+  ],
+  customDBFields: [
+    {
+      formElements: [
+        {
+          type: 'text',
+          name: 'options.database',
+          label: 'Database name',
+          placeholder: 'customdb',
+          // passProps: {
+          //   // multiple:true,
+          // },
+        },
+      ],
+    },
+    {
+      formElements: [
+        {
+          type: 'text',
+          name: 'options.username',
+          label: 'Database username',
+          placeholder: 'usr',
+          // passProps: {
+          //   // multiple:true,
+          // },
+        },
+      ],
+    },
+    {
+      formElements: [
+        {
+          type: 'text',
+          name: 'options.password',
+          label: 'Database password',
+          placeholder: 'pwd',
+          passProps: {
+            type: 'password'
+          },
+        },
+      ],
+    },
+    {
+      formElements: [
+        {
+          type: 'code',
+          name: 'options.connection_options',
+          label: 'Database connection options (sequelize)',
+          value: `//{
+//  'dialect': 'postgres',
+//  'port': 5432,
+//  'host': '127.0.0.1',
+//}`,
+          // passProps: {
+          //   // multiple:true,
+          // },
+        },
+      ],
+    },
+  ],
+  validations: [
+    {
+      field: 'options.database',
+      constraints: {
+        presence: {
+          message: '^SQL Databases require a database name',
+        },
+      },
+    },
+  ],
+}, options));
+
+const databaseForm = (options = {}) => {
+  return reactappLocals.server_manifest.tabs.getTabs({
+    type: 'pageToggle',
+    tabs: [
+      {
+        name: 'Loki DB',
+        layout: lowkieForm(options),
+      },
+      {
+        name: 'MongoDB',
+        layout: mongoForm(options),
+      },
+      {
+        name: 'SQL',
+        layout: sqlForm(options),
+      },
+    ],
+  });
+};
+
+const getEditForm = (options = {}) => ({
+  layout: {
+    component: 'Content',
+      children: [
+        options.form,
+      ],
+  },
+  resources: {
+    databasedata: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs/:id?format=json`,
+  },
+  pageData: {
+    title: 'Edit Database',
+      navLabel:'Edit Database',
+  },
+}); 
 
 module.exports = {
   containers: {
@@ -130,11 +343,11 @@ module.exports = {
             styles: {
               // ui: {}
             },
-            title: 'Manage User Roles',
+            title: 'Manage Databases',
             action: {
               type: 'modal',
-              title: 'Add User Role',
-              pathname: `${reactapp.manifest_prefix}add-userrole`,
+              title: 'Add Database',
+              pathname: `${reactapp.manifest_prefix}ext/dcd/add-database`,
               buttonProps: {
                 props: {
                   color:'isSuccess',
@@ -143,9 +356,9 @@ module.exports = {
             },
           }),
           reactappLocals.server_manifest.table.getTable({
-            schemaName: 'standard_userroles',
-            baseUrl:`${reactapp.manifest_prefix}contentdata/standard_userroles?format=json`,
-            asyncdataprops: 'userroles',
+            schemaName: 'dynamicdb_coredatadbs',
+            baseUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
+            asyncdataprops: 'databases',
             headers: [
               {
                 buttons: [
@@ -154,13 +367,17 @@ module.exports = {
                       onClick: 'func:this.props.createModal',
                       onclickThisProp:'onclickPropObject',
                       onclickProps: {
-                        title: 'Edit User Role',
-                        pathname: `${reactapp.manifest_prefix}edit-userrole/:id`,
+                        title: 'Edit Database',
+                        pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
                         params: [
                           {
                             key: ':id',
                             val: '_id',
-                          }
+                          },
+                          {
+                            key: ':type',
+                            val: 'type',
+                          },
                         ],
                       },
                       buttonProps:{
@@ -177,8 +394,13 @@ module.exports = {
               },
               {
                 sortable:true,
-                sortid: 'name',
-                label: 'Name',
+                sortid: 'database_name',
+                label: 'Database Name',
+              },
+              {
+                sortable:true,
+                sortid: 'type',
+                label: 'Type',
               },
               {
                 sortable:true,
@@ -196,69 +418,55 @@ module.exports = {
                 },
               },
               {
-                sortable:true,
-                sortid: 'userroleid',
-                label: 'User Role ID',
-              },
-              {
-                sortable:true,
-                sortid: 'privileges',
-                label: 'Privileges',
-                customCellLayout: {
-                  component: 'DynamicLayout',
-                  // ignoreReduxProps:true,
-                  thisprops: {
-                    items:['cell'],
-                  },
-                  bindprops:true,
-                  props: {
-                    style: {
-                      display:'block'
-                    },
-                    layout: {
-                      bindprops:true,
-                      component: 'Tag',
-                      props: {
-                        color: 'isDark',
-                        style: {
-                          margin:'0.25rem'
-                        }
+                sortid:'type',
+                label: 'Edit Models',
+                buttons: [
+                  {
+                    passProps: {
+                      onClick: 'func:this.props.reduxRouter.push',
+                      onclickBaseUrl: `${reactapp.manifest_prefix}ext/dcd/manage-models/:id`,
+                      onclickLinkParams: [
+                        {
+                          key: ':id',
+                          val: '_id',
+                        },
+                        // {
+                        //   key: ':type',
+                        //   val: 'type',
+                        // },
+                      ],
+                      // onclickThisProp:'onclickPropObject',
+                      // onclickProps: {
+                      //   title: 'Edit Database',
+                      //   pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
+                      //   params: [
+                      //     {
+                      //       key: ':id',
+                      //       val: '_id',
+                      //     },
+                      //     {
+                      //       key: ':type',
+                      //       val: 'type',
+                      //     },
+                      //   ],
+                      // },
+                      buttonProps:{
+                        color: 'isInfo',
+                        buttonStyle: 'isOutlined',
+                        icon:'fa fa-database',
+                        children:'Edit Models',
                       },
-                      children: [
-                        {
-                          bindprops:true,
-                          component: 'span',
-                          thisprops: {
-                            _children:['name']
-                          }
-                        },
-                        {
-                          component: 'span',
-                          children:' (',
-                        },
-                        {
-                          bindprops:true,
-                          component: 'span',
-                          thisprops: {
-                            _children:['userprivilegeid']
-                          }
-                        },
-                        {
-                          component: 'span',
-                          children:')',
-                        },
-                      ]
-                    }
+                      children:'Edit Models',
+                    },
                   }
-                },
+                ],
               },
             ],
-         
           }),
         ],
       },
       resources: {
-        userroles:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
+        databases:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
       },
       pageData: {
         title:'Manage Databases',
@@ -268,7 +476,7 @@ module.exports = {
     [`${reactapp.manifest_prefix}ext/dcd/add-database`]: {
       layout: {
         component: 'Content',
-        children:[ userRoleForm(), ],
+        children:[ databaseForm(), ],
       },
       resources: {},
       pageData: {
@@ -276,18 +484,9 @@ module.exports = {
         navLabel:'Add a Database',
       },
     },
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/:id`]: {
-      layout: {
-        component: 'Content',
-        children:[ userRoleForm({ update:true, }), ],
-      },
-      resources: {
-        userroledata:`${reactapp.manifest_prefix}contentdata/standard_userroles/:id?format=json`,
-      },
-      pageData: {
-        title:'Add a Database',
-        navLabel:'Add a Database',
-      },
-    },
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id`]: getEditForm({form:lowkieForm({ update: true, })}),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongo/:id`]: getEditForm({form:mongoForm({ update: true, })}),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/sql/:id`]: getEditForm({form:sqlForm({ update: true, })}),
   },
 };
+// console.log('databaseForm({ update: true, })', util.inspect(Object.assign({}, databaseForm({ update: true, }),{ bindprops: true }), { depth: 7 }));

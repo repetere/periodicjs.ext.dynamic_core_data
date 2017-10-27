@@ -42,6 +42,16 @@ const scheme = {
       this.setDataValue('scheme_options', JSON.stringify(val));
     },
   },
+  scheme_associations: {
+    type: Sequelize.STRING,
+    // allowNull: false,
+    get() {
+      return JSON.parse(this.getDataValue('scheme_associations'));
+    },
+    set(val) {
+      this.setDataValue('scheme_associations', JSON.stringify(val));
+    },
+  },
   scheme_core_data_options: {
     type: Sequelize.STRING,
     // allowNull: false,
