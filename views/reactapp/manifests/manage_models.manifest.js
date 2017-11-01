@@ -154,6 +154,9 @@ const modelForm = (options = {}) => {
                     value: 'Number',
                   },
                   {
+                    value: 'Integer',
+                  },
+                  {
                     value: 'Schema.Types.Mixed',
                   },
                   {
@@ -251,9 +254,8 @@ const modelForm = (options = {}) => {
             type: 'code',
             name: 'scheme_options',
             label: 'Core Data Options',
-            value: `
-
-            
+            value: `{
+}          
 `,
           },
         ],
@@ -273,9 +275,8 @@ const modelForm = (options = {}) => {
             type: 'text',
             name: 'scheme_associations',
             label: 'Core Data Associations',
-            value: `
-            
-            
+            value: `{            
+}
 `,
           },
         ],

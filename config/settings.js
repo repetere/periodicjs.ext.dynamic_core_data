@@ -2,7 +2,8 @@
 
 module.exports = {
   settings: {
-    defaults:true,
+    defaults: true,
+    sync_on_start: true,
   },
   databases: {
     dynamicdb: {

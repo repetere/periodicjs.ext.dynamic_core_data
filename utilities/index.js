@@ -1,3 +1,8 @@
 'use strict';
+const connect = require('./connect');
+const model = require('./model');
 
-module.exports = {};
+module.exports = {
+  connect,
+  model,
+};

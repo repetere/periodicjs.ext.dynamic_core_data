@@ -344,16 +344,28 @@ module.exports = {
               // ui: {}
             },
             title: 'Manage Databases',
-            action: {
-              type: 'modal',
-              title: 'Add Database',
-              pathname: `${reactapp.manifest_prefix}ext/dcd/add-database`,
-              buttonProps: {
-                props: {
-                  color:'isSuccess',
+            action: [
+              {
+                type: 'modal',
+                title: 'Add Database',
+                pathname: `${reactapp.manifest_prefix}ext/dcd/add-database`,
+                buttonProps: {
+                  props: {
+                    color:'isSuccess',
+                  },
                 },
               },
-            },
+              {
+                type: 'modal',
+                title: 'Add Model',
+                pathname: `${reactapp.manifest_prefix}ext/dcd/add-model`,
+                buttonProps: {
+                  props: {
+                    color:'isSuccess',
+                  },
+                },
+              },
+            ]
           }),
           reactappLocals.server_manifest.table.getTable({
             schemaName: 'dynamicdb_coredatadbs',
@@ -418,48 +430,90 @@ module.exports = {
                 },
               },
               {
-                sortid:'type',
+                sortid:'core_data_models',
                 label: 'Edit Models',
-                buttons: [
-                  {
-                    passProps: {
-                      onClick: 'func:this.props.reduxRouter.push',
-                      onclickBaseUrl: `${reactapp.manifest_prefix}ext/dcd/manage-models/:id`,
-                      onclickLinkParams: [
-                        {
-                          key: ':id',
-                          val: '_id',
-                        },
-                        // {
-                        //   key: ':type',
-                        //   val: 'type',
-                        // },
-                      ],
-                      // onclickThisProp:'onclickPropObject',
-                      // onclickProps: {
-                      //   title: 'Edit Database',
-                      //   pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
-                      //   params: [
-                      //     {
-                      //       key: ':id',
-                      //       val: '_id',
-                      //     },
-                      //     {
-                      //       key: ':type',
-                      //       val: 'type',
-                      //     },
-                      //   ],
-                      // },
-                      buttonProps:{
-                        color: 'isInfo',
-                        buttonStyle: 'isOutlined',
-                        icon:'fa fa-database',
-                        children:'Edit Models',
+                customCellLayout: {
+                  component: 'DynamicLayout',
+                  thisprops: {
+                    items:['cell'],
+                  },
+                  bindprops: true,
+                  props: {
+                    layout: {
+                      bindprops:true,
+                      component: 'ResponsiveButton',
+                      thisprops: {
+                        _children:['name']
                       },
-                      children:'Edit Models',
-                    },
+                      props: {
+                        style: {
+                          marginRight: '0.5rem',
+                        },
+                        onClick: 'func:this.props.createModal',
+                        // onclickThisProp:'onclickPropObject',
+                        onclickProps: {
+                          title: 'Edit Model',
+                          pathname: `${reactapp.manifest_prefix}ext/dcd/edit-model/:id`,
+                          params: [
+                            {
+                              key: ':id',
+                              val: '_id',
+                            },
+                            {
+                              key: ':type',
+                              val: 'type',
+                            },
+                          ],
+                        },
+                        buttonProps:{
+                          color: 'isInfo',
+                          buttonStyle: 'isOutlined',
+                          icon:'fa fa-database',
+                        },
+                      },
+                    }
                   }
-                ],
+                }
+                // buttons: [
+                //   {
+                //     passProps: {
+                //       onClick: 'func:this.props.reduxRouter.push',
+                //       onclickBaseUrl: `${reactapp.manifest_prefix}ext/dcd/manage-models/:id`,
+                //       onclickLinkParams: [
+                //         {
+                //           key: ':id',
+                //           val: '_id',
+                //         },
+                //         // {
+                //         //   key: ':type',
+                //         //   val: 'type',
+                //         // },
+                //       ],
+                //       // onclickThisProp:'onclickPropObject',
+                //       // onclickProps: {
+                //       //   title: 'Edit Database',
+                //       //   pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
+                //       //   params: [
+                //       //     {
+                //       //       key: ':id',
+                //       //       val: '_id',
+                //       //     },
+                //       //     {
+                //       //       key: ':type',
+                //       //       val: 'type',
+                //       //     },
+                //       //   ],
+                //       // },
+                //       buttonProps:{
+                //         color: 'isInfo',
+                //         buttonStyle: 'isOutlined',
+                //         icon:'fa fa-database',
+                //         children:'Edit Models',
+                //       },
+                //       children:'Edit Models',
+                //     },
+                //   }
+                // ],
               },
             ],
           }),
