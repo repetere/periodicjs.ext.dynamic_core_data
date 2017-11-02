@@ -32,10 +32,12 @@ function connectDynamicDatabases() {
             const dataRouters = reactappLocals.data.getDataCoreController();
             
             let dbroutes = dbs.reduce((result, db) => { 
-              let coredatamodels = db.core_data_models.map(model => `dcd_${db.database_name}_${model.name}`);
-              let missingModels = coredatamodels.filter(coredatamodel => !loadedRouters.has(coredatamodel));
-              // console.log({ coredatamodels, missingModels });
-              result.push(...missingModels);
+              if (db.core_data_models && db.core_data_models.length) {
+                let coredatamodels = db.core_data_models.map(model => `dcd_${db.database_name}_${model.name}`);
+                let missingModels = coredatamodels.filter(coredatamodel => !loadedRouters.has(coredatamodel));
+                // console.log({ coredatamodels, missingModels });
+                result.push(...missingModels);
+              }
               return result;
             }, []);
             // console.log({ dbroutes });
@@ -114,7 +116,7 @@ function initializeDB(db) {
   return new Promise((resolve, reject) => {
     try {
       const connectSettingsDB = periodicInit.config.connectDB.bind(periodic);
-      if (db.core_data_models.length) {
+      if (db && db.core_data_models&& db.core_data_models.length) {
         Promise.all(db.core_data_models.map(modelObj => model.createModelFile({ database: db, model: modelObj, })))
         .then(setupmodels => {
           resolve(connectSettingsDB(db));
