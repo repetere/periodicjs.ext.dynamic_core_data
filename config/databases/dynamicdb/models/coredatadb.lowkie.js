@@ -13,6 +13,7 @@ const scheme = {
   title: String,
   options: {
     dbpath: String,//for lowkie
+    dboptions: Schema.Types.Mixed,//for lowkie
     url: String,//for mongoose
     mongoose_options: Schema.Types.Mixed,//for mongoose
     database: String,//for sequelize

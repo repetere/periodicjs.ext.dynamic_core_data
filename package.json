@@ -1,7 +1,7 @@
 {
   "name": "periodicjs.ext.dynamic_core_data",
   "description": "Dynamically add databases and models to your periodic application via core data ORM.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "index.js",
   "engines": {
     "node": "^6.x"
