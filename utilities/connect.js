@@ -6,23 +6,17 @@ const Promisie = require('promisie');
 const logger = periodic.logger;
 const model = require('./model');
 let dynamicCoredataDatabases={};
-let dynamicCoredataModels = {};
-let allDynamicDbs = [];
-let allDynamicModels = [];
+// let dynamicCoredataModels = {};
 let loadedRouters = new Set();
 
 function connectDynamicDatabases() {
-  // const util= require('util')
-  // console.log({ periodicInit });
-  // console.log('periodic.datas.keys()', periodic.datas.keys());
   return new Promise((resolve, reject) => {
     try {
       dynamicCoredataDatabases = periodic.datas.get('dynamicdb_coredatadb');
-      dynamicCoredataModels = periodic.datas.get('dynamicdb_coredatamodel');
+      // dynamicCoredataModels = periodic.datas.get('dynamicdb_coredatamodel');
       getAllDBs()
         .then(dbs => { 
-          // console.log(util.inspect( dbs,{depth:4 }));
-          const formattedDBs = dbs.map(db => formatDBforLoad({ database: db }));
+          const formattedDBs = dbs.map(db => formatDBforLoad({ database: db, }));
           return Promisie.each(formattedDBs, 5, initializeDB);
         })
         .then(dbs => {
@@ -31,13 +25,6 @@ function connectDynamicDatabases() {
             const reactappLocals = periodic.locals.extensions.get('periodicjs.ext.reactapp');
             const reactapp = reactappLocals.reactapp();
             const dataRouters = reactappLocals.data.getDataCoreController();
-            
-            Promisie.all(reactappLocals.controllerhelper.pullConfigurationSettings(), reactappLocals.controllerhelper.pullComponentSettings())
-            .then(() => {
-              logger.silly('RELOADED MANIFEST SETTINGS ');
-            })
-              .catch(logger.silly.bind(logger, 'settings error'));
-            // let dbroutes = dbs.reduce(,db => loadedRouters.indexOf(db.database_name));
             
             let dbroutes = dbs.reduce((result, db) => { 
               let coredatamodels = db.core_data_models.map(model => `dcd_${db.database_name}_${model.name}`);
@@ -48,22 +35,36 @@ function connectDynamicDatabases() {
             }, []);
             // console.log({ dbroutes });
             if (dbroutes.length) {
-              logger.silly('adding routes for', { dbroutes });
+              logger.silly('adding routes for', { dbroutes, });
               dbroutes.forEach(dbr => {
                 const dbrrouter = dataRouters.get(dbr);
                 periodic.app.use(`${reactapp.manifest_prefix}contentdata`, dbrrouter.router);
                 loadedRouters.add(dbr);
-              })
+              });
               // loadedRouters.add(...dbroutes);
-              logger.debug('adding new routers', { loadedRouters });
+              // Set new RA views
+              reactappLocals.controllerhelper.CORE_DATA_CONFIGURATIONS.manifest =
+                reactappLocals.manifest.coreData.generateCoreDataManifests();
+              //update navigation
+              let core_data_list = [];
+              for (let key of periodic.datas.keys()) {
+                if (key !== 'configuration' && key !== 'extension') {
+                  core_data_list.push(key);
+                }
+              }
+              periodic.app.locals.core_data_list = core_data_list.reduce(periodic.utilities.routing.splitModelNameReducer, {});
+              Promisie.all(reactappLocals.controllerhelper.pullConfigurationSettings(), reactappLocals.controllerhelper.pullComponentSettings())
+              .then(() => {
+                logger.silly('RELOADED MANIFEST SETTINGS ');
+              })
+                .catch(logger.silly.bind(logger, 'settings error'));
+              
+              logger.debug('adding new routers', { loadedRouters, });
             } else {
-              logger.debug('already added all routes',{loadedRouters})
+              logger.debug('already added all routes', { loadedRouters, });
             }
           }
           resolve(dbs);
-          // periodic.app.use('/testnewroute', (req, res) => { res.send({ status: 'added dynamically' }) })
-            // console.log('periodic.datas.keys()', periodic.datas.keys());
-          // console.log('periodic.app',periodic.app)
         })
         .catch(reject);  
     } catch (e) {
@@ -75,7 +76,7 @@ function connectDynamicDatabases() {
 function getAllDBs() {
   return new Promise((resolve, reject) => {
     try {
-      return resolve(dynamicCoredataDatabases.query({}))
+      return resolve(dynamicCoredataDatabases.query({}));
     } catch (e) {
       return reject(e);
     }
@@ -83,7 +84,7 @@ function getAllDBs() {
 }
 
 function formatDBforLoad(options) {
-  const { database } = options;
+  const { database, } = options;
   return Object.assign({}, database, {
     db: database.type,
     periodic_db_name: `dcd_${database.database_name}`,
@@ -92,13 +93,13 @@ function formatDBforLoad(options) {
     controller: {
       default: {
         responder: {
-          adapter: 'json'
+          adapter: 'json',
         },
         protocol: {
           api: 'rest',
-          adapter: 'http'
-        }
-      }
+          adapter: 'http',
+        },
+      },
     },
   });
 }
@@ -108,12 +109,12 @@ function initializeDB(db) {
     try {
       const connectSettingsDB = periodicInit.config.connectDB.bind(periodic);
       if (db.core_data_models.length) {
-        Promise.all(db.core_data_models.map(modelObj => model.createModelFile({ database: db, model: modelObj })))
+        Promise.all(db.core_data_models.map(modelObj => model.createModelFile({ database: db, model: modelObj, })))
         .then(setupmodels => {
           resolve(connectSettingsDB(db));
         }).catch(reject);
       } else {
-        resolve(model.ensureModelDir({ database: db }));
+        resolve(model.ensureModelDir({ database: db, }));
       }
     } catch (e) {
       reject(e);
