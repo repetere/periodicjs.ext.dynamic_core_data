@@ -15,9 +15,14 @@ function connectDynamicDatabases() {
       dynamicCoredataDatabases = periodic.datas.get('dynamicdb_coredatadb');
       // dynamicCoredataModels = periodic.datas.get('dynamicdb_coredatamodel');
       getAllDBs()
-        .then(dbs => { 
-          const formattedDBs = dbs.map(db => formatDBforLoad({ database: db, }));
-          return Promisie.each(formattedDBs, 5, initializeDB);
+        .then(dbs => {
+          if (!dbs.length) {
+            logger.silly('No custom dbs to load');
+            resolve(dbs);
+          } else {
+            const formattedDBs = dbs.map(db => formatDBforLoad({ database: db, }));
+            return Promisie.each(formattedDBs, 5, initializeDB);
+          }
         })
         .then(dbs => {
           logger.verbose(`Connected databases: ${dbs.map(db => `${db.database_name}(${db.type})`).join(', ')}`);
