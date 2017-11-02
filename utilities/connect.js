@@ -64,6 +64,7 @@ function connectDynamicDatabases() {
               logger.debug('already added all routes', { loadedRouters, });
             }
           }
+          periodic.status.emit('extension-periodicjs.ext.dynamic_core_data-configured', true);          
           resolve(dbs);
         })
         .catch(reject);  
