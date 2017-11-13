@@ -2,6 +2,7 @@
 const periodic = require('periodicjs');
 const periodicInit = require('periodicjs/lib/init');
 const Promisie = require('promisie');
+const vm = require('vm');
 // const pluralize = require('pluralize');
 const logger = periodic.logger;
 const model = require('./model');
@@ -115,14 +116,32 @@ function formatDBforLoad(options) {
 function initializeDB(db) {
   return new Promise((resolve, reject) => {
     try {
+      const sandbox = {
+        dboptions: {},
+        mongoose_options: {},
+        connection_options: {},
+      };
+      const script = new vm.Script(`
+      dboptions = ${db.options.dboptions||'{}'};
+      mongoose_options = ${db.options.mongoose_options||'{}'};
+      connection_options = ${db.options.connection_options || '{}'};
+      `);
+      const context = vm.createContext(sandbox);
       const connectSettingsDB = periodicInit.config.connectDB.bind(periodic);
+      script.runInContext(sandbox);
+      db.options = Object.assign({}, db.options, sandbox);
       if (db && db.core_data_models&& db.core_data_models.length) {
         Promise.all(db.core_data_models.map(modelObj => model.createModelFile({ database: db, model: modelObj, })))
-        .then(setupmodels => {
-          resolve(connectSettingsDB(db));
-        }).catch(reject);
+          .then(setupmodels => {
+            resolve(connectSettingsDB(db));
+          }).catch(reject);
       } else {
-        resolve(model.ensureModelDir({ database: db, }));
+        model.ensureModelDir({ database: db, })
+          .then(() => {
+            resolve(connectSettingsDB(db));
+          });
+        // resolve(
+        // );
       }
     } catch (e) {
       reject(e);

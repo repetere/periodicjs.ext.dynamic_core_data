@@ -208,7 +208,8 @@ const mongoForm = (options = {}) => newDBForm(Object.assign({
     {
       field: 'options.url',
       constraints: {
-        presence: {
+        length: {
+          minimum:1,
           message: '^Mongo Databases require a valid mongo url',
         },
       },
@@ -284,7 +285,8 @@ const sqlForm = (options = {}) => newDBForm(Object.assign({
     {
       field: 'options.database',
       constraints: {
-        presence: {
+        length: {
+          minimum:1,
           message: '^SQL Databases require a database name',
         },
       },
@@ -539,8 +541,8 @@ module.exports = {
       },
     },
     [`${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id`]: getEditForm({form:lowkieForm({ update: true, })}),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongo/:id`]: getEditForm({form:mongoForm({ update: true, })}),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/sql/:id`]: getEditForm({form:sqlForm({ update: true, })}),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongoose/:id`]: getEditForm({form:mongoForm({ update: true, })}),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/sequelize/:id`]: getEditForm({form:sqlForm({ update: true, })}),
   },
 };
 // console.log('databaseForm({ update: true, })', util.inspect(Object.assign({}, databaseForm({ update: true, }),{ bindprops: true }), { depth: 7 }));
