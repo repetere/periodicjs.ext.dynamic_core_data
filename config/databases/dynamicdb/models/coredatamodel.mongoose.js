@@ -11,15 +11,15 @@ const scheme = {
     type: String,
     index: {
       unique: true,
-      sparse: false
-    }
+      sparse: false,
+    },
   },
   database_name: {
     type: String,
     index: {
       unique: true,
-      sparse: false
-    }
+      sparse: false,
+    },
   },
   description: String,
   title: String,
@@ -32,14 +32,15 @@ const scheme = {
       field_index: Boolean,
       field_expires: String,
       field_ref: String,
-    }
+      field_props: String,
+    },
   ],
   scheme_options: Schema.Types.Mixed,
   scheme_associations: Schema.Types.Mixed,
   scheme_core_data_options: {
     sort: Schema.Types.Mixed,
     docid: Schema.Types.Mixed,
-    search: [ String ],
+    search: [String,],
     population: String,
   },
 };
@@ -49,8 +50,8 @@ module.exports = {
   options: {},
   coreDataOptions: {
     sort: { createdat: -1, },
-    docid: ['_id','name','database_name'],
-    search: ['name', 'title', 'description' ],
+    docid: ['_id', 'name', 'database_name',],
+    search: ['name', 'title', 'description',],
     // population: false,
   },
 };

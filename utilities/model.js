@@ -59,6 +59,7 @@ const dataTypes = {
     '[Ref]':'ObjectId',
   },
 };
+const logger = periodic.logger;
 
 function generateModel(options) {
   return {
@@ -69,7 +70,7 @@ function generateModel(options) {
 }
 
 function getCoreDataModelProperties(options) {
-  const { model } = options;
+  const { model, } = options;
   model.scheme_associations = (typeof model.scheme_associations === 'undefined') ? '[]' : model.scheme_associations.replace(/(\r\n|\w|\n|\r)/gm, "");
   model.scheme_core_data_options = (model.scheme_core_data_options) ? model.scheme_core_data_options : {};
   // console.log({model})
@@ -99,7 +100,7 @@ scheme_associations = ${model.scheme_associations||'[]'}
 }
 
 function getFieldProps(options) {
-  const { type, field } = options;
+  const { type, field, } = options;
   let schemaField = {};
   if (type === 'sequelize') {
     schemaField.type = dataTypes[ type ][ field.field_type ];
@@ -123,15 +124,23 @@ function getFieldProps(options) {
   if (field.field_default) {
     schemaField.default = field.field_default; 
   }
+  if (field.field_props) {
+    try {
+      let fieldAttributes = JSON.parse(field.field_props);
+      schemaField = Object.assign({}, schemaField, fieldAttributes);
+    } catch (e) {
+      logger.error(e);
+    }
+  }
   return schemaField;
 }
 
 function getSchemaFields(options) {
-  const { type, fields } = options;
+  const { type, fields, } = options;
   const scheme = {};
 
   fields.forEach(field => {
-    scheme[ field.field_name ] = getFieldProps({ type, field });
+    scheme[ field.field_name ] = getFieldProps({ type, field, });
   });
   // console.log('unflatted ',{scheme})
 
@@ -153,19 +162,20 @@ function getRawValue(value) {
     .replace(/\"Sequelize.FLOAT\"/gi, 'Sequelize.FLOAT')
     .replace(/\"Number\"/gi, 'Number')
     .replace(/\"Number\"/gi, 'Number')
+    .replace(/Date:/gi, 'date:');
 }
 
 function generateLowkieModel(options) {
-  const { model } = options;
+  const { model, } = options;
   const sandbox = getCoreDataModelProperties(options);
-  const scheme = getSchemaFields({ type: 'lowkie', fields: model.scheme_fields });
+  const scheme = getSchemaFields({ type: 'lowkie', fields: model.scheme_fields, });
   // console.log({ scheme });
   
   return `'use strict';
 const lowkie = require('lowkie');
 const Schema = lowkie.Schema;
 const ObjectId = Schema.ObjectId;
-const scheme = ${ getRawValue(JSON.stringify(scheme,null,2)) };
+const scheme = ${ getRawValue(JSON.stringify(scheme, null, 2)) };
 
 module.exports = {
   scheme,
@@ -181,16 +191,16 @@ module.exports = {
 }
 
 function generateMongooseModel(options) {
-  const { model } = options;
+  const { model, } = options;
   const sandbox = getCoreDataModelProperties(options);
-  const scheme = getSchemaFields({ type: 'mongoose', fields: model.scheme_fields });
+  const scheme = getSchemaFields({ type: 'mongoose', fields: model.scheme_fields, });
   // console.log('generateMongooseModel',{ scheme });
   
   return `'use strict';
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
-const scheme = ${getRawValue(JSON.stringify(scheme,null,2))};
+const scheme = ${getRawValue(JSON.stringify(scheme, null, 2))};
 
 module.exports = {
   scheme,
@@ -206,14 +216,13 @@ module.exports = {
 }
 
 function generateSequelizeModel(options) {
-  const { model } = options;
+  const { model, } = options;
   const sandbox = getCoreDataModelProperties(options);
-  const scheme = getSchemaFields({ type: 'sequelize', fields: model.scheme_fields });
-  // console.log('generateSequelizeModel',{ scheme });
+  const scheme = getSchemaFields({ type: 'sequelize', fields: model.scheme_fields, });
 
-return `'use strict';
+  return `'use strict';
 const Sequelize = require('sequelize');
-const scheme = ${getRawValue(JSON.stringify(scheme,null,2))};
+const scheme = ${getRawValue(JSON.stringify(scheme, null, 2))};
 
 module.exports = {
   scheme,

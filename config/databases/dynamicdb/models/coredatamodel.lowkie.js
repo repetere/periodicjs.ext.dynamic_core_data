@@ -20,7 +20,8 @@ const scheme = {
       field_index: Boolean,
       field_expires: String,
       field_ref: String,
-    }
+      field_props: String,
+    },
   ],
   scheme_options: Schema.Types.Mixed,
   scheme_associations: Schema.Types.Mixed,

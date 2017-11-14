@@ -114,7 +114,7 @@ const modelForm = (options = {}) => {
               multi: true,
               // selector: '_id',
               entity:'standard_userrole',
-              resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`
+              resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`,
             },
             useInputRows: true,
             addNewRows: true,
@@ -185,7 +185,7 @@ const modelForm = (options = {}) => {
                   {
                     value: '[Ref]',
                   },
-                ]
+                ],
               },
               {
                 sortid:'field_default',
@@ -202,6 +202,11 @@ const modelForm = (options = {}) => {
               {
                 sortid:'field_expires',
                 label:'Field Expires',
+              },
+              {
+                sortid:'field_props',
+                formtype: 'text',
+                label:'Field Props',
               },
             ],
             passProps: {
@@ -275,8 +280,8 @@ const modelForm = (options = {}) => {
             type: 'text',
             name: 'scheme_associations',
             label: 'Core Data Associations',
-            value: `{            
-}
+            value: `[
+]
 `,
           },
         ],
@@ -306,7 +311,7 @@ const modelForm = (options = {}) => {
     // hiddenFields
     asyncprops: (options.update)
       ? {
-        formdata: [ 'modeldata', 'data' ],
+        formdata: ['modeldata', 'data',],
         // formdata: [ 'databasedata', 'data' ],
       }
       : {},
@@ -328,7 +333,7 @@ module.exports = {
             styles: {
               // ui: {}
             },
-            asynctitle:['data','title'],
+            asynctitle:['data', 'title',],
             title: 'Manage Models',
             action: {
               type: 'modal',
@@ -346,13 +351,13 @@ module.exports = {
             children: [
               {
                 component: 'span',
-                children: 'Database: '
+                children: 'Database: ',
               },
               {
                 component: 'span',
                 asyncprops: {
-                  children:['coredb','data','database_name']
-                }
+                  children:['coredb', 'data', 'database_name',],
+                },
               },
             ],  
           },
@@ -390,7 +395,7 @@ module.exports = {
                           icon:'fa fa-pencil',
                         },
                       },
-                    }
+                    },
                   ],
                   sortid: '_id',
                   sortable:true,
@@ -429,8 +434,8 @@ module.exports = {
               ],
             },
             asyncprops: {
-              rows:['coredb','data','core_data_models']
-            }
+              rows:['coredb', 'data', 'core_data_models',],
+            },
           },
         ],
       },
@@ -445,7 +450,7 @@ module.exports = {
     [`${reactapp.manifest_prefix}ext/dcd/add-model`]: {
       layout: {
         component: 'Content',
-        children: [ modelForm(),
+        children: [modelForm(),
           {
             component: 'div',
             props: {
@@ -454,10 +459,10 @@ module.exports = {
                 .__re-bulma_modal-card{
                   width:auto;
                 }
-                </style>`
-              }
-            }
-          }
+                </style>`,
+              },
+            },
+          },
         ],
       },
       resources: {
@@ -471,7 +476,7 @@ module.exports = {
     [`${reactapp.manifest_prefix}ext/dcd/edit-model/:id`]: {
       layout: {
         component: 'Content',
-        children: [ modelForm({ update: true }),
+        children: [modelForm({ update: true, }),
           {
             component: 'div',
             props: {
@@ -480,10 +485,10 @@ module.exports = {
                 .__re-bulma_modal-card{
                   width:auto;
                 }
-                </style>`
-              }
-            }
-          }
+                </style>`,
+              },
+            },
+          },
         ],
       },
       resources: {
