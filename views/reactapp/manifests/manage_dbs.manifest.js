@@ -78,8 +78,8 @@ const newDBForm = (options = {}) => reactappLocals.server_manifest.forms.createF
               multi: true,
               selector: '_id',
               entity:'dynamicdb_coredatamodel',
-              resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`
-            }
+              resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`,
+            },
             // passProps: {
             //   // multiple:true,
             // },
@@ -111,7 +111,7 @@ const newDBForm = (options = {}) => reactappLocals.server_manifest.forms.createF
   // hiddenFields
   asyncprops: (options.update)
     ? {
-      formdata: [ 'databasedata', 'data' ],
+      formdata: ['databasedata', 'data', ],
       // formdata: [ 'databasedata', 'data' ],
     }
     : {},
@@ -168,6 +168,22 @@ const mongoForm = (options = {}) => newDBForm(Object.assign({
       form_static_val: 'mongoose',
       form_name: 'type',
     },
+    {
+      form_val: '_id',
+      form_name: '_id',
+    },
+    {
+      form_val: 'name',
+      form_name: 'name',
+    },
+    {
+      form_val: '$loki',
+      form_name: '$loki',
+    },
+    {
+      form_val: 'meta',
+      form_name: 'meta',
+    },
   ],
   customDBFields: [
     {
@@ -222,6 +238,22 @@ const sqlForm = (options = {}) => newDBForm(Object.assign({
       form_static_val: 'sequelize',
       form_name: 'type',
     },
+    {
+      form_val: '_id',
+      form_name: '_id',
+    },
+    {
+      form_val: 'name',
+      form_name: 'name',
+    },
+    {
+      form_val: '$loki',
+      form_name: '$loki',
+    },
+    {
+      form_val: 'meta',
+      form_name: 'meta',
+    },
   ],
   customDBFields: [
     {
@@ -258,7 +290,7 @@ const sqlForm = (options = {}) => newDBForm(Object.assign({
           label: 'Database password',
           placeholder: 'pwd',
           passProps: {
-            type: 'password'
+            type: 'password',
           },
         },
       ],
@@ -317,16 +349,16 @@ const databaseForm = (options = {}) => {
 const getEditForm = (options = {}) => ({
   layout: {
     component: 'Content',
-      children: [
-        options.form,
-      ],
+    children: [
+      options.form,
+    ],
   },
   resources: {
     databasedata: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs/:id?format=json`,
   },
   pageData: {
     title: 'Edit Database',
-      navLabel:'Edit Database',
+    navLabel:'Edit Database',
   },
 }); 
 
@@ -367,7 +399,7 @@ module.exports = {
                   },
                 },
               },
-            ]
+            ],
           }),
           reactappLocals.server_manifest.table.getTable({
             schemaName: 'dynamicdb_coredatadbs',
@@ -400,7 +432,7 @@ module.exports = {
                         icon:'fa fa-pencil',
                       },
                     },
-                  }
+                  },
                 ],
                 sortid: '_id',
                 sortable:true,
@@ -437,7 +469,7 @@ module.exports = {
                 customCellLayout: {
                   component: 'DynamicLayout',
                   thisprops: {
-                    items:['cell'],
+                    items:['cell', ],
                   },
                   bindprops: true,
                   props: {
@@ -445,7 +477,7 @@ module.exports = {
                       bindprops:true,
                       component: 'ResponsiveButton',
                       thisprops: {
-                        _children:['name']
+                        _children:['name', ],
                       },
                       props: {
                         style: {
@@ -473,9 +505,9 @@ module.exports = {
                           icon:'fa fa-database',
                         },
                       },
-                    }
-                  }
-                }
+                    },
+                  },
+                },
                 // buttons: [
                 //   {
                 //     passProps: {
@@ -532,7 +564,7 @@ module.exports = {
     [`${reactapp.manifest_prefix}ext/dcd/add-database`]: {
       layout: {
         component: 'Content',
-        children:[ databaseForm(), ],
+        children:[databaseForm(), ],
       },
       resources: {},
       pageData: {
@@ -540,9 +572,9 @@ module.exports = {
         navLabel:'Add a Database',
       },
     },
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id`]: getEditForm({form:lowkieForm({ update: true, })}),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongoose/:id`]: getEditForm({form:mongoForm({ update: true, })}),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/sequelize/:id`]: getEditForm({form:sqlForm({ update: true, })}),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id`]: getEditForm({ form:lowkieForm({ update: true, }),  }),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongoose/:id`]: getEditForm({ form:mongoForm({ update: true, }), }),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/sequelize/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
   },
 };
 // console.log('databaseForm({ update: true, })', util.inspect(Object.assign({}, databaseForm({ update: true, }),{ bindprops: true }), { depth: 7 }));
