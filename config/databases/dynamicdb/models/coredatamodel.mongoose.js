@@ -16,10 +16,10 @@ const scheme = {
   },
   database_name: {
     type: String,
-    index: {
-      unique: true,
-      sparse: false,
-    },
+    // index: {
+    //   unique: true,
+    //   sparse: false,
+    // },
   },
   description: String,
   title: String,
