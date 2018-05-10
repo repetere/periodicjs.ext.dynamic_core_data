@@ -126,7 +126,11 @@ function getFieldProps(options) {
   }
   if (field.field_props) {
     try {
-      let fieldAttributes = JSON.parse(field.field_props);
+      let sandbox = {
+        attrs: {},
+      };
+      vm.runInNewContext(`attrs = ${field.field_props}`, sandbox);
+      let fieldAttributes = sandbox.attrs;// JSON.parse(field.field_props);
       schemaField = Object.assign({}, schemaField, fieldAttributes);
     } catch (e) {
       logger.error(e);
