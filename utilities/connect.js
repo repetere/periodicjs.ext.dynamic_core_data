@@ -85,7 +85,11 @@ function connectDynamicDatabases() {
 function getAllDBs() {
   return new Promise((resolve, reject) => {
     try {
-      return resolve(dynamicCoredataDatabases.query({}));
+      dynamicCoredataDatabases.query({})
+        .then(dbs => { 
+          return resolve(dbs.map(db => db._doc ? db._doc : db));
+        })
+        .catch(reject);
     } catch (e) {
       return reject(e);
     }
@@ -113,9 +117,12 @@ function formatDBforLoad(options) {
   });
 }
 
-function initializeDB(db) {
+function initializeDB(dbDocument) {
   return new Promise((resolve, reject) => {
     try {
+      const db = (dbDocument._doc)
+        ? dbDocument._doc
+        : dbDocument;
       const sandbox = {
         dboptions: {},
         mongoose_options: {},
