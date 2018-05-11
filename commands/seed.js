@@ -35,7 +35,7 @@ function utilityFunction(functionName, options) {
 }
 
 function export_collection(options) {
-  //$ periodicjs extension periodicjs.ext.dynamic_core_data export_collection path/to/some/json;include1,include2;exclude1,exclude2
+  //$ periodicjs extension periodicjs.ext.dynamic_core_data export_collection path/to/some/json,,,include1,include2,,,exclude1,exclude2
   // periodicjs extension periodicjs.ext.dynamic_core_data export_collection ~/Downloads/testexportseed.json;dcd_transactions_transaction
   return utilityFunction('exportSeed', options);
 }

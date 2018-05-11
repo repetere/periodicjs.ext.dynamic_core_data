@@ -5,7 +5,7 @@ const path = require('path');
 const vm = require('vm');
 const flatten = require('flat');
 const periodic = require('periodicjs');
-const periodicInit = require('periodicjs/lib/init');
+// const periodicInit = require('periodicjs/lib/init');
 const dataTypes = {
   lowkie: {
     ObjectId:'ObjectId',
@@ -71,7 +71,7 @@ function generateModel(options) {
 
 function getCoreDataModelProperties(options) {
   const { model, } = options;
-  model.scheme_associations = (typeof model.scheme_associations === 'undefined') ? '[]' : model.scheme_associations.replace(/(\r\n|\w|\n|\r)/gm, "");
+  model.scheme_associations = (typeof model.scheme_associations === 'undefined') ? '[]' : model.scheme_associations.replace(/(\r\n|\w|\n|\r)/gm, '');
   model.scheme_core_data_options = (model.scheme_core_data_options) ? model.scheme_core_data_options : {};
   // console.log({model})
   const sandbox = {
@@ -108,8 +108,8 @@ function getFieldProps(options) {
     if (field.field_type.indexOf('[') !== -1) {
       schemaField = [
         {
-          type : dataTypes[ type ][ field.field_type ]
-        }
+          type : dataTypes[ type ][ field.field_type ],
+        },
       ];
     } else {
       schemaField.type = dataTypes[ type ][ field.field_type ];
@@ -249,7 +249,7 @@ function getExtensionDBModelDir(options) {
 function ensureModelDir(options) {
   return new Promise((resolve, reject) => {
     try {
-      const { database } = options;
+      const { database, } = options;
       const getModelDir = getExtensionDBModelDir.bind(periodic);
       const modelDirPath = getModelDir({
         periodic_db_name: database.periodic_db_name,
@@ -265,7 +265,7 @@ function ensureModelDir(options) {
 function createModelFile(options) {
   return new Promise((resolve, reject) => {
     try {
-      const { database, model } = options;
+      const { database, model, } = options;
       const getModelDir = getExtensionDBModelDir.bind(periodic);
       // const getExtensionDBModelDir = periodicInit.config.getExtensionDBModelDir.bind(periodic);
       const modelDirPath = getModelDir({
