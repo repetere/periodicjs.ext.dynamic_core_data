@@ -6,6 +6,19 @@ const vm = require('vm');
 const flatten = require('flat');
 const periodic = require('periodicjs');
 // const periodicInit = require('periodicjs/lib/init');
+
+const SEQUELIZE_MIXED_FIELD = Symbol('::SQL_MIXED::');
+function getSQLMixedField() {
+  return `type: Sequelize.TEXT,
+    // allowNull: false,
+    get() {
+      return this.getDataValue('raw') ? JSON.parse(this.getDataValue('raw')) : {};
+    },
+    set(val) {
+      this.setDataValue('raw', JSON.stringify(val));
+    },`;
+}
+
 const dataTypes = {
   lowkie: {
     ObjectId:'ObjectId',
@@ -48,14 +61,14 @@ const dataTypes = {
     Boolean:'Sequelize.BOOLEAN',
     Number:'Sequelize.FLOAT',
     Integer:'Sequelize.INTEGER',
-    'Schema.Types.Mixed':'Sequelize.STRING',
+    'Schema.Types.Mixed': SEQUELIZE_MIXED_FIELD,
     Ref:'Sequelize.INTEGER',
     '[ObjectId]':'ObjectId',
     '[String]':'String',
     '[Date]':'Date',
     '[Boolean]':'Boolean',
     '[Number]':'Number',
-    '[Schema.Types.Mixed]':'Sequelize.STRING',
+    '[Schema.Types.Mixed]': SEQUELIZE_MIXED_FIELD,
     '[Ref]':'ObjectId',
   },
 };
@@ -93,7 +106,7 @@ scheme_options = ${model.scheme_options || '{}'}
 scheme_associations = ${model.scheme_associations||'[]'}
 `);
   const context = vm.createContext(sandbox);
-  script.runInContext(sandbox);
+  script.runInNewContext(context);
   // console.log({ sandbox });
 
   return sandbox;
@@ -103,7 +116,14 @@ function getFieldProps(options) {
   const { type, field, } = options;
   let schemaField = {};
   if (type === 'sequelize') {
-    schemaField.type = dataTypes[ type ][ field.field_type ];
+    const fieldType = dataTypes[ type ][ field.field_type ];
+    if (fieldType === SEQUELIZE_MIXED_FIELD) {
+      schemaField.toJSON = () => Object.assign({}, schemaField, {
+        type: '::MIXED_FIELD::',
+      });
+    } else {
+      schemaField.type = fieldType;
+    }
   } else {
     if (field.field_type.indexOf('[') !== -1) {
       schemaField = [
@@ -152,21 +172,22 @@ function getSchemaFields(options) {
 }
 
 function getRawValue(value) {
-  return value.replace(/\"String\"/gi, 'String')
-    .replace(/\"Number\"/gi, 'Number')
-    .replace(/\"Date\"/gi, 'Date')
-    .replace(/\"Date.now\"/gi, 'Date.now')
-    .replace(/\"Boolean\"/gi, 'Boolean')
-    .replace(/\"ObjectId\"/gi, 'ObjectId')
-    .replace(/\"Schema.Types.Mixed\"/gi, 'Schema.Types.Mixed')
-    .replace(/\"Sequelize.INTEGER\"/gi, 'Sequelize.INTEGER')
-    .replace(/\"Sequelize.STRING\"/gi, 'Sequelize.STRING')
-    .replace(/\"Sequelize.DATE\"/gi, 'Sequelize.DATE')
-    .replace(/\"Sequelize.BOOLEAN\"/gi, 'Sequelize.BOOLEAN')
-    .replace(/\"Sequelize.FLOAT\"/gi, 'Sequelize.FLOAT')
-    .replace(/\"Number\"/gi, 'Number')
-    .replace(/\"Number\"/gi, 'Number')
-    .replace(/Date:/gi, 'date:');
+  return value.replace(/"String"/gi, 'String')
+    .replace(/"Number"/gi, 'Number')
+    .replace(/"Date"/gi, 'Date')
+    .replace(/"Date.now"/gi, 'Date.now')
+    .replace(/"Boolean"/gi, 'Boolean')
+    .replace(/"ObjectId"/gi, 'ObjectId')
+    .replace(/"Schema.Types.Mixed"/gi, 'Schema.Types.Mixed')
+    .replace(/"Sequelize.INTEGER"/gi, 'Sequelize.INTEGER')
+    .replace(/"Sequelize.STRING"/gi, 'Sequelize.STRING')
+    .replace(/"Sequelize.DATE"/gi, 'Sequelize.DATE')
+    .replace(/"Sequelize.BOOLEAN"/gi, 'Sequelize.BOOLEAN')
+    .replace(/"Sequelize.FLOAT"/gi, 'Sequelize.FLOAT')
+    .replace(/"Number"/gi, 'Number')
+    .replace(/"Number"/gi, 'Number')
+    .replace(/Date:/gi, 'date:')
+    .replace(/"type":\s*"::MIXED_FIELD::"/g, getSQLMixedField());
 }
 
 function generateLowkieModel(options) {
