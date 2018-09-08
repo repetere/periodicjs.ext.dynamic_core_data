@@ -6,6 +6,7 @@ const vm = require('vm');
 const flatten = require('flat');
 const periodic = require('periodicjs');
 const Redshift = require('@repetere/node-redshift');
+const capitalize = require('capitalize');
 // const periodicInit = require('periodicjs/lib/init');
 
 const SEQUELIZE_MIXED_FIELD = Symbol('::SQL_MIXED::');
@@ -81,13 +82,13 @@ const dataTypes = {
     Integer:`Redshift.DataTypes.${Redshift.DataTypes.INTEGER}`,
     'Schema.Types.Mixed': `Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
     Ref:`Redshift.DataTypes.${Redshift.DataTypes.INTEGER}`,
-    '[ObjectId]':'ObjectId',
-    '[String]':'String',
-    '[Date]':'Date',
-    '[Boolean]':'Boolean',
-    '[Number]':'Number',
+    '[ObjectId]':`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
+    '[String]':`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
+    '[Date]':`Redshift.DataTypes.${Redshift.DataTypes.TIMESTAMP}`,
+    '[Boolean]':`Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}`,
+    '[Number]':`Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}`,
     '[Schema.Types.Mixed]': `Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    '[Ref]':'ObjectId',
+    '[Ref]':`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
   },
   bigquery: {
     ObjectId: 'string',
@@ -98,13 +99,13 @@ const dataTypes = {
     Integer:'integer',
     'Schema.Types.Mixed': 'string',
     Ref:'integer',
-    '[ObjectId]':'ObjectId',
-    '[String]':'String',
-    '[Date]':'Date',
-    '[Boolean]':'Boolean',
-    '[Number]':'Number',
-    '[Schema.Types.Mixed]': 'Schema.Types.Mixed',
-    '[Ref]':'ObjectId',
+    '[ObjectId]':'string',
+    '[String]':'string',
+    '[Date]':'timestamp',
+    '[Boolean]':'boolean',
+    '[Number]':'float',
+    '[Schema.Types.Mixed]': 'string',
+    '[Ref]':'string',
   },
 };
 const logger = periodic.logger;
@@ -152,46 +153,50 @@ scheme_associations = ${model.scheme_associations||'[]'}
 function getFieldProps(options) {
   const { type, field, } = options;
   let schemaField = {};
-  if (type === 'sequelize') {
-    const fieldType = dataTypes[ type ][ field.field_type ];
-    if (fieldType === SEQUELIZE_MIXED_FIELD) {
-      schemaField.toJSON = () => Object.assign({}, schemaField, {
-        type: `::MIXED_FIELD::${field.field_name}::`,
-      });
+  if (type !== 'bigquery') {
+    if (type === 'sequelize') {
+      const fieldType = dataTypes[ type ][ field.field_type ];
+      if (fieldType === SEQUELIZE_MIXED_FIELD) {
+        schemaField.toJSON = () => Object.assign({}, schemaField, {
+          type: `::MIXED_FIELD::${field.field_name}::`,
+        });
+      } else {
+        schemaField.type = fieldType;
+      }
     } else {
-      schemaField.type = fieldType;
+      if (field.field_type.indexOf('[') !== -1 && type !== 'redshift') {
+        schemaField = [
+          {
+            type : dataTypes[ type ][ field.field_type ],
+          },
+        ];
+      } else {
+        schemaField.type = dataTypes[ type ][ field.field_type ];
+      }
+      if (field.field_ref) {
+        schemaField.ref = field.field_ref; 
+      }
+      if (field.field_expires) {
+        schemaField.expires = field.field_expires; 
+      }
+    }
+    if (field.field_default) {
+      schemaField.default = field.field_default; 
+    }
+    if (field.field_props) {
+      try {
+        let sandbox = {
+          attrs: {},
+        };
+        vm.runInNewContext(`attrs = ${field.field_props}`, sandbox);
+        let fieldAttributes = sandbox.attrs;// JSON.parse(field.field_props);
+        schemaField = Object.assign({}, schemaField, fieldAttributes);
+      } catch (e) {
+        logger.error(e);
+      }
     }
   } else {
-    if (field.field_type.indexOf('[') !== -1) {
-      schemaField = [
-        {
-          type : dataTypes[ type ][ field.field_type ],
-        },
-      ];
-    } else {
-      schemaField.type = dataTypes[ type ][ field.field_type ];
-    }
-    if (field.field_ref) {
-      schemaField.ref = field.field_ref; 
-    }
-    if (field.field_expires) {
-      schemaField.expires = field.field_expires; 
-    }
-  }
-  if (field.field_default) {
-    schemaField.default = field.field_default; 
-  }
-  if (field.field_props) {
-    try {
-      let sandbox = {
-        attrs: {},
-      };
-      vm.runInNewContext(`attrs = ${field.field_props}`, sandbox);
-      let fieldAttributes = sandbox.attrs;// JSON.parse(field.field_props);
-      schemaField = Object.assign({}, schemaField, fieldAttributes);
-    } catch (e) {
-      logger.error(e);
-    }
+    schemaField = dataTypes[ type ][ field.field_type ];
   }
   return schemaField;
 }
@@ -209,10 +214,12 @@ function getSchemaFields(options) {
   }
 
   fields.forEach(field => {
-    if (options.type === 'redshift' || options.type === 'bigquery') {
-      scheme.tableProperties[field.field_name] = getFieldProps({ type, field, });
-    } else {
-      scheme[ field.field_name ] = getFieldProps({ type, field, });
+    if (field.field_name) {
+      if (options.type === 'redshift' || options.type === 'bigquery') {
+        scheme.tableProperties[(options.type === 'bigquery') ? capitalize(field.field_name) : field.field_name] = getFieldProps({ type, field, });
+      } else {
+        scheme[ field.field_name ] = getFieldProps({ type, field, });
+      }
     }
   });
   // console.log('unflatted ',{scheme})
@@ -242,11 +249,6 @@ function getRawValue(value) {
     [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}`],
     [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}`],
     [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.INTEGER}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.INTEGER}`],
-    [/string/g, '\'string\''],
-    [/timestamp/g, '\'timestamp\''],
-    [/boolean/g, '\'boolean\''],
-    [/float/g, '\'float\''],
-    [/integer/g, '\'integer\''],
   ];
   let found;
   const mixedFieldRegexp = /"type":\s*"::MIXED_FIELD::([^:]+)::"/g;
@@ -343,8 +345,8 @@ function generateRedshiftModel(options) {
   const sandbox = getCoreDataModelProperties(options);
   const scheme = getSchemaFields({ type: 'redshift', fields: model.scheme_fields, tableName: model.name, });
   
-  return `'use strict;
-const Redshift = require('@repetere/node-redshift);
+  return `'use strict';
+const Redshift = require('@repetere/node-redshift');
 const scheme = ${getRawValue(JSON.stringify(scheme, null, 2))}
   
 module.exports = {
@@ -365,8 +367,8 @@ function generateBigQueryModel(options) {
   const sandbox = getCoreDataModelProperties(options);
   const scheme = getSchemaFields({ type: 'bigquery', fields: model.scheme_fields, tableName: model.name, dataset: model.title, });
   
-  return `'use strict;
-const BigQuery = require('@google-cloud/bigquery);
+  return `'use strict';
+const BigQuery = require('@google-cloud/bigquery');
 const scheme = ${getRawValue(JSON.stringify(scheme, null, 2))}
   
 module.exports = {
@@ -416,14 +418,18 @@ function createModelFile(options) {
       // console.log('createModelFile', { database, model, modelDirPath });
       fs.ensureDir(modelDirPath)
         .then(() => {
-          const modelStrings = generateModel(options);
-          resolve(Promise.all([
-            fs.outputFile(path.join(modelDirPath, `${model.name}.lowkie.js`), modelStrings.lowkie),
-            fs.outputFile(path.join(modelDirPath, `${model.name}.mongoose.js`), modelStrings.mongoose),
-            fs.outputFile(path.join(modelDirPath, `${model.name}.sequelize.js`), modelStrings.sequelize),
-            fs.outputFile(path.join(modelDirPath, `${model.name}.redshift.js`), modelStrings.redshift),
-            fs.outputFile(path.join(modelDirPath, `${model.name}.bigquery.js`), modelStrings.bigquery),
-          ]));
+          try {
+            const modelStrings = generateModel(options);
+            resolve(Promise.all([
+              fs.outputFile(path.join(modelDirPath, `${model.name}.lowkie.js`), modelStrings.lowkie),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.mongoose.js`), modelStrings.mongoose),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.sequelize.js`), modelStrings.sequelize),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.redshift.js`), modelStrings.redshift),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.bigquery.js`), modelStrings.bigquery),
+            ]));
+          } catch (err) {
+            reject(err);
+          }
         })  
         .catch(reject);
     } catch (e) {

@@ -3,6 +3,7 @@ const periodic = require('periodicjs');
 const utilities = require('./utilities');
 const logger = periodic.logger;
 module.exports = () => {
+  console.log('calling listener for dynamic core data configuration');
   periodic.status.on('configuration-complete', (status) => {
     console.log('~~~~~~~~~~~~~~~~~~~~');
     console.log('~~~~~~~~~~~~~~~~~~~~');
