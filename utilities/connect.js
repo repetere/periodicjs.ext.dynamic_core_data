@@ -13,12 +13,10 @@ let loadedRouters = new Set();
 function connectDynamicDatabases() {
   return new Promise((resolve, reject) => {
     try {
-      console.log('connecting dynamic databases');
       dynamicCoredataDatabases = periodic.datas.get('dynamicdb_coredatadb');
       // dynamicCoredataModels = periodic.datas.get('dynamicdb_coredatamodel');
       getAllDBs()
         .then(dbs => {
-          console.log('dbs for dynamic databases', dbs);
           if (!dbs.length) {
             logger.silly('No custom dbs to load');
             resolve(dbs);
