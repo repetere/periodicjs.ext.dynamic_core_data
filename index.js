@@ -3,13 +3,7 @@ const periodic = require('periodicjs');
 const utilities = require('./utilities');
 const logger = periodic.logger;
 module.exports = () => {
-  console.log('calling listener for dynamic core data configuration');
   periodic.status.on('configuration-complete', (status) => {
-    console.log('~~~~~~~~~~~~~~~~~~~~');
-    console.log('~~~~~~~~~~~~~~~~~~~~');
-    console.log('calling dynamic database configuration');
-    console.log('~~~~~~~~~~~~~~~~~~~~');
-    console.log('~~~~~~~~~~~~~~~~~~~~');
     utilities.connect.connectDynamicDatabases()
       .then(() => {
         logger.silly('loaded dynamic databases');

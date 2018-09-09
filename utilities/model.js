@@ -5,7 +5,6 @@ const path = require('path');
 const vm = require('vm');
 const flatten = require('flat');
 const periodic = require('periodicjs');
-const Redshift = require('@repetere/node-redshift');
 const capitalize = require('capitalize');
 // const periodicInit = require('periodicjs/lib/init');
 
@@ -74,21 +73,21 @@ const dataTypes = {
     '[Ref]':'ObjectId',
   },
   redshift: {
-    ObjectId: `Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    String:`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    Date:`Redshift.DataTypes.${Redshift.DataTypes.TIMESTAMP}`,
-    Boolean:`Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}`,
-    Number:`Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}`,
-    Integer:`Redshift.DataTypes.${Redshift.DataTypes.INTEGER}`,
-    'Schema.Types.Mixed': `Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    Ref:`Redshift.DataTypes.${Redshift.DataTypes.INTEGER}`,
-    '[ObjectId]':`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    '[String]':`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    '[Date]':`Redshift.DataTypes.${Redshift.DataTypes.TIMESTAMP}`,
-    '[Boolean]':`Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}`,
-    '[Number]':`Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}`,
-    '[Schema.Types.Mixed]': `Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
-    '[Ref]':`Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`,
+    ObjectId: 'Redshift.DataTypes.VARCHAR',
+    String:'Redshift.DataTypes.VARCHAR',
+    Date:'Redshift.DataTypes.TIMESTAMP',
+    Boolean:'Redshift.DataTypes.BOOLEAN',
+    Number:'Redshift.DataTypes.DOUBLE',
+    Integer:'Redshift.DataTypes.INTEGER',
+    'Schema.Types.Mixed': 'Redshift.DataTypes.VARCHAR',
+    Ref:'Redshift.DataTypes.INTEGER',
+    '[ObjectId]':'Redshift.DataTypes.VARCHAR',
+    '[String]':'Redshift.DataTypes.VARCHAR',
+    '[Date]':'Redshift.DataTypes.TIMESTAMP',
+    '[Boolean]':'Redshift.DataTypes.BOOLEAN',
+    '[Number]':'Redshift.DataTypes.DOUBLE',
+    '[Schema.Types.Mixed]': 'Redshift.DataTypes.VARCHAR',
+    '[Ref]':'Redshift.DataTypes.VARCHAR',
   },
   bigquery: {
     ObjectId: 'string',
@@ -244,11 +243,11 @@ function getRawValue(value) {
     [/"Number"/g, 'Number'],
     [/"Number"/g, 'Number'],
     [/Date:/g, 'date:'],
-    [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.VARCHAR}`],
-    [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.TIMESTAMP}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.TIMESTAMP}`],
-    [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.BOOLEAN}`],
-    [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.DOUBLE}`],
-    [new RegExp(`"Redshift.DataTypes.${Redshift.DataTypes.INTEGER}"`, 'g'), `Redshift.DataTypes.${Redshift.DataTypes.INTEGER}`],
+    [new RegExp('"Redshift.DataTypes.VARCHAR"', 'g'), 'Redshift.DataTypes.VARCHAR'],
+    [new RegExp('"Redshift.DataTypes.TIMESTAMP"', 'g'), 'Redshift.DataTypes.TIMESTAMP'],
+    [new RegExp('"Redshift.DataTypes.BOOLEAN"', 'g'), 'Redshift.DataTypes.BOOLEAN'],
+    [new RegExp('"Redshift.DataTypes.DOUBLE"', 'g'), 'Redshift.DataTypes.DOUBLE'],
+    [new RegExp('"Redshift.DataTypes.INTEGER"', 'g'), 'Redshift.DataTypes.INTEGER'],
   ];
   let found;
   const mixedFieldRegexp = /"type":\s*"::MIXED_FIELD::([^:]+)::"/g;
