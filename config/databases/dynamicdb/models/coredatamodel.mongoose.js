@@ -25,6 +25,7 @@ const scheme = {
   title: String,
   scheme_fields: [
     {
+      _id: false,
       field_name: String,
       field_type: String,
       field_default: String,

@@ -70,6 +70,14 @@ const modelForm = (options = {}) => {
                 value: 'sequelize',
                 label: 'SQL',
               },
+              {
+                value: 'redshift',
+                label: 'Redshift',
+              },
+              {
+                value: 'bigquery',
+                label: 'Big Query',
+              },
             ],
           },
         ],
@@ -110,12 +118,12 @@ const modelForm = (options = {}) => {
             type: 'datatable',
             name: 'scheme_fields',
             label: 'Schema Fields',
-            datalist: {
-              multi: true,
-              // selector: '_id',
-              entity:'standard_userrole',
-              resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`,
-            },
+            // datalist: {
+            //   multi: true,
+            //   // selector: '_id',
+            //   entity:'standard_userrole',
+            //   resourceUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels?format=json`,
+            // },
             useInputRows: true,
             addNewRows: true,
             flattenRowData: true,
@@ -190,18 +198,35 @@ const modelForm = (options = {}) => {
               {
                 sortid:'field_default',
                 label:'Field Default',
+                formtype:'text',
               },
               {
                 sortid:'field_unique',
-                label:'Field Unique',
+                label: 'Field Unique',
+                formtype: 'select',
+                value: 0,
+                defaultValue: 0,
+                formoptions:[
+                  {
+                    value: 0,
+                    defaultValue: 0,
+                    label: 'false',
+                  },
+                  {
+                    value: 1,
+                    label: 'true',
+                  },
+                ]
               },
               {
                 sortid:'field_ref',
-                label:'Field Ref',
+                label: 'Field Ref',
+                formtype:'text',
               },
               {
                 sortid:'field_expires',
                 label:'Field Expires',
+                formtype:'text',
               },
               {
                 sortid:'field_props',
@@ -210,10 +235,12 @@ const modelForm = (options = {}) => {
               },
             ],
             passProps: {
-              uploadAddButton: false,
-              useDownArrowButton: false,
-              useUpArrowButton: false,
-              tableFormAddButtonProps: true,
+              uploadAddButton: true,
+              replaceButton:true,
+              // uploadAddButton: false,
+              // useDownArrowButton: false,
+              // useUpArrowButton: false,
+              // tableFormAddButtonProps: true,
               turnOffTableSort: true,
               tableProps: {
                 isBordered:true,

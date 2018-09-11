@@ -234,10 +234,7 @@ const mongoForm = (options = {}) => newDBForm(Object.assign({
 }, options));
 const sqlForm = (options = {}) => newDBForm(Object.assign({
   hiddenFields: [
-    {
-      form_static_val: 'sequelize',
-      form_name: 'type',
-    },
+    
     {
       form_val: '_id',
       form_name: '_id',
@@ -267,6 +264,25 @@ const sqlForm = (options = {}) => newDBForm(Object.assign({
           //   // multiple:true,
           // },
         },
+        {
+          type: 'select',
+          name: 'type',
+          label: 'DB Type',
+          options: [
+            {
+              label: 'SQL / Sequelize',
+              value:'sequelize',
+            },
+            {
+              label: 'Redshift',
+              value:'redshift',
+            },
+            {
+              label: 'Big Query',
+              value:'bigquery',
+            },
+          ],
+        },
       ],
     },
     {
@@ -280,10 +296,6 @@ const sqlForm = (options = {}) => newDBForm(Object.assign({
           //   // multiple:true,
           // },
         },
-      ],
-    },
-    {
-      formElements: [
         {
           type: 'text',
           name: 'options.password',
@@ -331,16 +343,16 @@ const databaseForm = (options = {}) => {
     type: 'pageToggle',
     tabs: [
       {
-        name: 'Loki DB',
-        layout: lowkieForm(options),
-      },
-      {
         name: 'MongoDB',
         layout: mongoForm(options),
       },
       {
         name: 'SQL',
         layout: sqlForm(options),
+      },
+      {
+        name: 'Loki DB',
+        layout: lowkieForm(options),
       },
     ],
   });
