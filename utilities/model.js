@@ -5,6 +5,7 @@ const path = require('path');
 const vm = require('vm');
 const flatten = require('flat');
 const periodic = require('periodicjs');
+const capitalize = require('capitalize');
 // const periodicInit = require('periodicjs/lib/init');
 
 const SEQUELIZE_MIXED_FIELD = Symbol('::SQL_MIXED::');
@@ -71,6 +72,40 @@ const dataTypes = {
     '[Schema.Types.Mixed]': SEQUELIZE_MIXED_FIELD,
     '[Ref]':'ObjectId',
   },
+  redshift: {
+    ObjectId: 'Redshift.DataTypes.VARCHAR',
+    String:'Redshift.DataTypes.VARCHAR',
+    Date:'Redshift.DataTypes.TIMESTAMP',
+    Boolean:'Redshift.DataTypes.BOOLEAN',
+    Number:'Redshift.DataTypes.DOUBLE',
+    Integer:'Redshift.DataTypes.INTEGER',
+    'Schema.Types.Mixed': 'Redshift.DataTypes.VARCHAR',
+    Ref:'Redshift.DataTypes.INTEGER',
+    '[ObjectId]':'Redshift.DataTypes.VARCHAR',
+    '[String]':'Redshift.DataTypes.VARCHAR',
+    '[Date]':'Redshift.DataTypes.TIMESTAMP',
+    '[Boolean]':'Redshift.DataTypes.BOOLEAN',
+    '[Number]':'Redshift.DataTypes.DOUBLE',
+    '[Schema.Types.Mixed]': 'Redshift.DataTypes.VARCHAR',
+    '[Ref]':'Redshift.DataTypes.VARCHAR',
+  },
+  bigquery: {
+    ObjectId: 'string',
+    String:'string',
+    Date:'timestamp',
+    Boolean:'boolean',
+    Number:'float',
+    Integer:'integer',
+    'Schema.Types.Mixed': 'string',
+    Ref:'integer',
+    '[ObjectId]':'string',
+    '[String]':'string',
+    '[Date]':'timestamp',
+    '[Boolean]':'boolean',
+    '[Number]':'float',
+    '[Schema.Types.Mixed]': 'string',
+    '[Ref]':'string',
+  },
 };
 const logger = periodic.logger;
 
@@ -79,6 +114,8 @@ function generateModel(options) {
     lowkie: generateLowkieModel(options),
     mongoose: generateMongooseModel(options),
     sequelize: generateSequelizeModel(options),
+    redshift: generateRedshiftModel(options),
+    bigquery: generateBigQueryModel(options),
   };
 }
 
@@ -101,7 +138,7 @@ function getCoreDataModelProperties(options) {
 scheme_core_data_options.sort = ${model.scheme_core_data_options.sort||'{}'};
 scheme_core_data_options.docid = ${model.scheme_core_data_options.docid||'[]'};
 scheme_core_data_options.search = ${model.scheme_core_data_options.search || '[]'};
-scheme_core_data_options.population = ${model.scheme_core_data_options.population||'""'}
+scheme_core_data_options.population = ${model.scheme_core_data_options.population||(['redshift', 'bigquery'].indexOf(model.scheme_core_data_options.db || model.scheme_core_data_options.adapter) === -1) ? '""' : 'undefined'}
 scheme_options = ${model.scheme_options || '{}'}
 scheme_associations = ${model.scheme_associations||'[]'}
 `);
@@ -115,46 +152,50 @@ scheme_associations = ${model.scheme_associations||'[]'}
 function getFieldProps(options) {
   const { type, field, } = options;
   let schemaField = {};
-  if (type === 'sequelize') {
-    const fieldType = dataTypes[ type ][ field.field_type ];
-    if (fieldType === SEQUELIZE_MIXED_FIELD) {
-      schemaField.toJSON = () => Object.assign({}, schemaField, {
-        type: `::MIXED_FIELD::${field.field_name}::`,
-      });
+  if (type !== 'bigquery') {
+    if (type === 'sequelize') {
+      const fieldType = dataTypes[ type ][ field.field_type ];
+      if (fieldType === SEQUELIZE_MIXED_FIELD) {
+        schemaField.toJSON = () => Object.assign({}, schemaField, {
+          type: `::MIXED_FIELD::${field.field_name}::`,
+        });
+      } else {
+        schemaField.type = fieldType;
+      }
     } else {
-      schemaField.type = fieldType;
+      if (field.field_type.indexOf('[') !== -1 && type !== 'redshift') {
+        schemaField = [
+          {
+            type : dataTypes[ type ][ field.field_type ],
+          },
+        ];
+      } else {
+        schemaField.type = dataTypes[ type ][ field.field_type ];
+      }
+      if (field.field_ref) {
+        schemaField.ref = field.field_ref; 
+      }
+      if (field.field_expires) {
+        schemaField.expires = field.field_expires; 
+      }
+    }
+    if (field.field_default) {
+      schemaField.default = field.field_default; 
+    }
+    if (field.field_props) {
+      try {
+        let sandbox = {
+          attrs: {},
+        };
+        vm.runInNewContext(`attrs = ${field.field_props}`, sandbox);
+        let fieldAttributes = sandbox.attrs;// JSON.parse(field.field_props);
+        schemaField = Object.assign({}, schemaField, fieldAttributes);
+      } catch (e) {
+        logger.error(e);
+      }
     }
   } else {
-    if (field.field_type.indexOf('[') !== -1) {
-      schemaField = [
-        {
-          type : dataTypes[ type ][ field.field_type ],
-        },
-      ];
-    } else {
-      schemaField.type = dataTypes[ type ][ field.field_type ];
-    }
-    if (field.field_ref) {
-      schemaField.ref = field.field_ref; 
-    }
-    if (field.field_expires) {
-      schemaField.expires = field.field_expires; 
-    }
-  }
-  if (field.field_default) {
-    schemaField.default = field.field_default; 
-  }
-  if (field.field_props) {
-    try {
-      let sandbox = {
-        attrs: {},
-      };
-      vm.runInNewContext(`attrs = ${field.field_props}`, sandbox);
-      let fieldAttributes = sandbox.attrs;// JSON.parse(field.field_props);
-      schemaField = Object.assign({}, schemaField, fieldAttributes);
-    } catch (e) {
-      logger.error(e);
-    }
+    schemaField = dataTypes[ type ][ field.field_type ];
   }
   return schemaField;
 }
@@ -162,9 +203,23 @@ function getFieldProps(options) {
 function getSchemaFields(options) {
   const { type, fields, } = options;
   const scheme = {};
+  if (options.type === 'redshift') {
+    scheme.tableProperties = {};
+    scheme.tableName = options.tableName;
+  } else if (options.type === 'bigquery') {
+    scheme.tableProperties = {};
+    scheme.tableName = options.tableName;
+    scheme.dataset = options.dataset;
+  }
 
   fields.forEach(field => {
-    scheme[ field.field_name ] = getFieldProps({ type, field, });
+    if (field.field_name) {
+      if (options.type === 'redshift' || options.type === 'bigquery') {
+        scheme.tableProperties[(options.type === 'bigquery') ? capitalize(field.field_name) : field.field_name] = getFieldProps({ type, field, });
+      } else {
+        scheme[ field.field_name ] = getFieldProps({ type, field, });
+      }
+    }
   });
   // console.log('unflatted ',{scheme})
 
@@ -173,24 +228,29 @@ function getSchemaFields(options) {
 
 function getRawValue(value) {
   const replacers = [
-    [/"String"/gi, 'String',],
-    [/"Number"/gi, 'Number'],
-    [/"Date"/gi, 'Date'],
-    [/"Date.now"/gi, 'Date.now'],
-    [/"Boolean"/gi, 'Boolean'],
-    [/"ObjectId"/gi, 'ObjectId'],
-    [/"Schema.Types.Mixed"/gi, 'Schema.Types.Mixed'],
-    [/"Sequelize.INTEGER"/gi, 'Sequelize.INTEGER'],
-    [/"Sequelize.STRING"/gi, 'Sequelize.STRING'],
-    [/"Sequelize.DATE"/gi, 'Sequelize.DATE'],
-    [/"Sequelize.BOOLEAN"/gi, 'Sequelize.BOOLEAN'],
-    [/"Sequelize.FLOAT"/gi, 'Sequelize.FLOAT'],
-    [/"Number"/gi, 'Number'],
-    [/"Number"/gi, 'Number'],
-    [/Date:/gi, 'date:'],
+    [/"String"/g, 'String',],
+    [/"Number"/g, 'Number'],
+    [/"Date"/g, 'Date'],
+    [/"Date.now"/g, 'Date.now'],
+    [/"Boolean"/g, 'Boolean'],
+    [/"ObjectId"/g, 'ObjectId'],
+    [/"Schema.Types.Mixed"/g, 'Schema.Types.Mixed'],
+    [/"Sequelize.INTEGER"/g, 'Sequelize.INTEGER'],
+    [/"Sequelize.STRING"/g, 'Sequelize.STRING'],
+    [/"Sequelize.DATE"/g, 'Sequelize.DATE'],
+    [/"Sequelize.BOOLEAN"/g, 'Sequelize.BOOLEAN'],
+    [/"Sequelize.FLOAT"/g, 'Sequelize.FLOAT'],
+    [/"Number"/g, 'Number'],
+    [/"Number"/g, 'Number'],
+    [/Date:/g, 'date:'],
+    [new RegExp('"Redshift.DataTypes.VARCHAR"', 'g'), 'Redshift.DataTypes.VARCHAR'],
+    [new RegExp('"Redshift.DataTypes.TIMESTAMP"', 'g'), 'Redshift.DataTypes.TIMESTAMP'],
+    [new RegExp('"Redshift.DataTypes.BOOLEAN"', 'g'), 'Redshift.DataTypes.BOOLEAN'],
+    [new RegExp('"Redshift.DataTypes.DOUBLE"', 'g'), 'Redshift.DataTypes.DOUBLE'],
+    [new RegExp('"Redshift.DataTypes.INTEGER"', 'g'), 'Redshift.DataTypes.INTEGER'],
   ];
   let found;
-  const mixedFieldRegexp = /"type":\s*"::MIXED_FIELD::([^:]+)::"/g
+  const mixedFieldRegexp = /"type":\s*"::MIXED_FIELD::([^:]+)::"/g;
   do {
     found = mixedFieldRegexp.exec(value);
     if (found) {
@@ -279,6 +339,50 @@ module.exports = {
 };`;
 }
 
+function generateRedshiftModel(options) {
+  const { model, } = options;
+  const sandbox = getCoreDataModelProperties(options);
+  const scheme = getSchemaFields({ type: 'redshift', fields: model.scheme_fields, tableName: model.name, });
+  
+  return `'use strict';
+const Redshift = require('@repetere/node-redshift');
+const scheme = ${getRawValue(JSON.stringify(scheme, null, 2))}
+  
+module.exports = {
+  scheme,
+  options: ${JSON.stringify(sandbox.scheme_options)},
+  associations: ${JSON.stringify(sandbox.scheme_associations)},
+  coreDataOptions: {
+    sort: ${JSON.stringify(sandbox.scheme_core_data_options.sort)},
+    docid: ${JSON.stringify(sandbox.scheme_core_data_options.docid)},
+    search: ${JSON.stringify(sandbox.scheme_core_data_options.search)},
+    population: ${JSON.stringify(sandbox.scheme_core_data_options.population)},
+  },
+};`;
+}
+
+function generateBigQueryModel(options) {
+  const { model, } = options;
+  const sandbox = getCoreDataModelProperties(options);
+  const scheme = getSchemaFields({ type: 'bigquery', fields: model.scheme_fields, tableName: model.name, dataset: model.title, });
+  
+  return `'use strict';
+const BigQuery = require('@google-cloud/bigquery');
+const scheme = ${getRawValue(JSON.stringify(scheme, null, 2))}
+  
+module.exports = {
+  scheme,
+  options: ${JSON.stringify(sandbox.scheme_options)},
+  associations: ${JSON.stringify(sandbox.scheme_associations)},
+  coreDataOptions: {
+    sort: ${JSON.stringify(sandbox.scheme_core_data_options.sort)},
+    docid: ${JSON.stringify(sandbox.scheme_core_data_options.docid)},
+    search: ${JSON.stringify(sandbox.scheme_core_data_options.search)},
+    population: ${JSON.stringify(sandbox.scheme_core_data_options.population)},
+  },
+};`;
+}
+
 function getExtensionDBModelDir(options) {
   const { periodic_db_name, db_ext_name, } = options;
   return path.join(this.config.app_root, `node_modules/${db_ext_name}/config/databases/${periodic_db_name}/models`);
@@ -313,12 +417,18 @@ function createModelFile(options) {
       // console.log('createModelFile', { database, model, modelDirPath });
       fs.ensureDir(modelDirPath)
         .then(() => {
-          const modelStrings = generateModel(options);
-          resolve(Promise.all([
-            fs.outputFile(path.join(modelDirPath, `${model.name}.lowkie.js`), modelStrings.lowkie),
-            fs.outputFile(path.join(modelDirPath, `${model.name}.mongoose.js`), modelStrings.mongoose),
-            fs.outputFile(path.join(modelDirPath, `${model.name}.sequelize.js`), modelStrings.sequelize),
-          ]));
+          try {
+            const modelStrings = generateModel(options);
+            resolve(Promise.all([
+              fs.outputFile(path.join(modelDirPath, `${model.name}.lowkie.js`), modelStrings.lowkie),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.mongoose.js`), modelStrings.mongoose),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.sequelize.js`), modelStrings.sequelize),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.redshift.js`), modelStrings.redshift),
+              fs.outputFile(path.join(modelDirPath, `${model.name}.bigquery.js`), modelStrings.bigquery),
+            ]));
+          } catch (err) {
+            reject(err);
+          }
         })  
         .catch(reject);
     } catch (e) {
