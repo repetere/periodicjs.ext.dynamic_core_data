@@ -62,15 +62,16 @@ function connectDynamicDatabases() {
               }
               periodic.app.locals.core_data_list = core_data_list.reduce(periodic.utilities.routing.splitModelNameReducer, {});
               Promisie.all(reactappLocals.controllerhelper.pullConfigurationSettings(), reactappLocals.controllerhelper.pullComponentSettings())
-              .then(() => {
-                logger.silly('RELOADED MANIFEST SETTINGS ');
-              })
+                .then(() => {
+                  logger.silly('RELOADED MANIFEST SETTINGS ');
+                })
                 .catch(logger.silly.bind(logger, 'settings error'));
               
               logger.debug('adding new routers', { loadedRouters, });
             } else {
               logger.debug('already added all routes', { loadedRouters, });
             }
+            periodic.status.emit('extension-periodicjs.ext.dynamic_core_data-mounted', true);          
           }
           periodic.status.emit('extension-periodicjs.ext.dynamic_core_data-configured', true);          
           resolve(dbs);
