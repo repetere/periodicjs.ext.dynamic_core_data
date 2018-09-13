@@ -49,7 +49,7 @@ async function assignSQLishModels(options) {
     const CoreDataModelSchema = Object.assign({}, modelModule.scheme);
     CoreDataModelSchema.tableProperties = Object.assign({}, CoreDataModelSchema.tableProperties, schemaDefaults[ model_type ]);
     const CoreConfigDataAdapter = this.core.data.create(
-      Object.assign({}, modelModule.coreDataOptions,{
+      Object.assign({}, modelModule.coreDataOptions, {
         adapter: model_type,
         model: CoreDataModelSchema,
         db_connection:db,
@@ -79,7 +79,7 @@ async function connectRedshiftDB(options) {
   const dboptions = options.options;
   dboptions.connection_options = Object.assign({}, { logging: this.config.debug, }, dboptions.connection_options);
   let { database, username, password, connection_options, } = dboptions;
-  const RedshiftDB = new Redshift(Object.assign({},{
+  const RedshiftDB = new Redshift(Object.assign({}, {
     user: username,
     password: password,
     database: database,
@@ -109,7 +109,7 @@ async function connectBigQueryDB(options) {
   const { periodic_db_name, db_config_type, } = options;
   const dboptions = options.options;
   dboptions.connection_options = Object.assign({}, { logging: this.config.debug, }, dboptions.connection_options);
-  const BigQueryDB = new BigQuery(dboptions.connection_options);
+  const BigQueryDB = new BigQuery({ credentials:dboptions.connection_options, });
   const modelDirPath = getDBModelDir.call(this, {
     db_ext_name: options.extension,
     db_container_name: options.container,

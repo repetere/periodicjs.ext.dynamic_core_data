@@ -587,6 +587,8 @@ module.exports = {
     [`${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id`]: getEditForm({ form:lowkieForm({ update: true, }),  }),
     [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongoose/:id`]: getEditForm({ form:mongoForm({ update: true, }), }),
     [`${reactapp.manifest_prefix}ext/dcd/edit-database/sequelize/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/redshift/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
+    [`${reactapp.manifest_prefix}ext/dcd/edit-database/bigquery/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
   },
 };
 // console.log('databaseForm({ update: true, })', util.inspect(Object.assign({}, databaseForm({ update: true, }),{ bindprops: true }), { depth: 7 }));

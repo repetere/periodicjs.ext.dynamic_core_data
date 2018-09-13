@@ -90,6 +90,18 @@ const modelForm = (options = {}) => {
             label: 'Title',
             name: 'title',
           },
+          {
+            type: 'text',
+            // placeholder:'Title',
+            label: 'Name',
+            name: 'name',
+          },
+          {
+            type: 'text',
+            // placeholder:'Title',
+            label: 'Database Name',
+            name: 'database_name',
+          },
         ],
       },
       // {
@@ -216,7 +228,7 @@ const modelForm = (options = {}) => {
                     value: 1,
                     label: 'true',
                   },
-                ]
+                ],
               },
               {
                 sortid:'field_ref',
@@ -338,7 +350,7 @@ const modelForm = (options = {}) => {
     // hiddenFields
     asyncprops: (options.update)
       ? {
-        formdata: ['modeldata', 'data',],
+        formdata: ['modeldata', 'data', ],
         // formdata: [ 'databasedata', 'data' ],
       }
       : {},
@@ -360,7 +372,7 @@ module.exports = {
             styles: {
               // ui: {}
             },
-            asynctitle:['data', 'title',],
+            asynctitle:['data', 'title', ],
             title: 'Manage Models',
             action: {
               type: 'modal',
@@ -383,7 +395,7 @@ module.exports = {
               {
                 component: 'span',
                 asyncprops: {
-                  children:['coredb', 'data', 'database_name',],
+                  children:['coredb', 'data', 'database_name', ],
                 },
               },
             ],  
@@ -461,7 +473,7 @@ module.exports = {
               ],
             },
             asyncprops: {
-              rows:['coredb', 'data', 'core_data_models',],
+              rows:['coredb', 'data', 'core_data_models', ],
             },
           },
         ],

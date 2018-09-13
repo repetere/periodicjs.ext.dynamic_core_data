@@ -215,7 +215,9 @@ function getSchemaFields(options) {
   fields.forEach(field => {
     if (field.field_name) {
       if (options.type === 'redshift' || options.type === 'bigquery') {
-        scheme.tableProperties[(options.type === 'bigquery') ? capitalize(field.field_name) : field.field_name] = getFieldProps({ type, field, });
+        scheme.tableProperties[ (options.type === 'bigquery')
+          ? field.field_name //capitalize(field.field_name)
+          : field.field_name ] = getFieldProps({ type, field, });
       } else {
         scheme[ field.field_name ] = getFieldProps({ type, field, });
       }
@@ -362,9 +364,14 @@ module.exports = {
 }
 
 function generateBigQueryModel(options) {
-  const { model, } = options;
+  const { database, model, } = options;
   const sandbox = getCoreDataModelProperties(options);
-  const scheme = getSchemaFields({ type: 'bigquery', fields: model.scheme_fields, tableName: model.name, dataset: model.title, });
+  const scheme = getSchemaFields({
+    type: 'bigquery',
+    fields: model.scheme_fields,
+    tableName: model.name,
+    dataset:  model.database_name || database.periodic_db_name || model.title || model.name,
+  });
   
   return `'use strict';
 const BigQuery = require('@google-cloud/bigquery');
