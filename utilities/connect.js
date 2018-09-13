@@ -6,6 +6,10 @@ const vm = require('vm');
 // const pluralize = require('pluralize');
 const logger = periodic.logger;
 const model = require('./model');
+const {
+  connectBigQueryDB,
+  connectRedshiftDB,
+} = require('./adapters');
 let dynamicCoredataDatabases={};
 // let dynamicCoredataModels = {};
 let loadedRouters = new Set();
@@ -141,12 +145,26 @@ function initializeDB(dbDocument) {
       if (db && db.core_data_models&& db.core_data_models.length) {
         Promise.all(db.core_data_models.map(modelObj => model.createModelFile({ database: db, model: modelObj, })))
           .then(setupmodels => {
-            resolve(connectSettingsDB(db));
+            switch (db.db) {
+            case 'redshift':
+              return resolve(connectRedshiftDB.call(periodic, db));
+            case 'bigquery':
+              return resolve(connectBigQueryDB.call(periodic, db));
+            default:
+              return resolve(connectSettingsDB(db));
+            }
           }).catch(reject);
       } else {
         model.ensureModelDir({ database: db, })
           .then(() => {
-            resolve(connectSettingsDB(db));
+            switch (db.db) {
+            case 'redshift':
+              return resolve(connectRedshiftDB.call(periodic, db));
+            case 'bigquery':
+              return resolve(connectBigQueryDB.call(periodic, db));
+            default:
+              return resolve(connectSettingsDB(db));
+            }
           });
         // resolve(
         // );
