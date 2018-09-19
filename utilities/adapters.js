@@ -34,7 +34,8 @@ const schemaDefaults = {
   },
 };
 async function assignSQLishModels(options) {
-  const { modelDirPath, periodic_db_name, db, dboptions, model_type, } = options;
+  const { modelDirPath, periodic_db_name, db, dboptions, model_type, 
+    connection_options, } = options;
   let { modelFiles, } = options;
   let firstCoreDataAdapter;
   if (periodic_db_name === 'standard' && this.resources.standard_models.length) {
@@ -48,6 +49,9 @@ async function assignSQLishModels(options) {
       require(path.join(modelDirPath, modelFilePath));
     const CoreDataModelSchema = Object.assign({}, modelModule.scheme);
     CoreDataModelSchema.tableProperties = Object.assign({}, CoreDataModelSchema.tableProperties, schemaDefaults[ model_type ]);
+    if (connection_options.table_prefix) { 
+      CoreDataModelSchema.tableName = `${connection_options.table_prefix}${CoreDataModelSchema.tableName}`;
+    }
     const CoreConfigDataAdapter = this.core.data.create(
       Object.assign({}, modelModule.coreDataOptions, {
         adapter: model_type,
@@ -102,6 +106,7 @@ async function connectRedshiftDB(options) {
     model_type: 'redshift',
     db: RedshiftDB,
     dboptions: options,
+    connection_options,
   });
 }
 
