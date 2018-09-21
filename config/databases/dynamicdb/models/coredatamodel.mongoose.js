@@ -41,7 +41,7 @@ const scheme = {
   scheme_core_data_options: {
     sort: Schema.Types.Mixed,
     docid: Schema.Types.Mixed,
-    search: [String,],
+    search: String,
     population: String,
   },
 };

@@ -20,16 +20,20 @@ const schemaDefaults = {
   },
   redshift: {
     _id:{
-      type:Redshift.DataTypes.INTEGER,
+      type: Redshift.DataTypes.BIGINT,
+      notNull: true,
+      primaryKey: true,
+      "index": true,
+      "unique": true
     },
     entitytype:{
       type:Redshift.DataTypes.VARCHAR,
     },
     createdat:{
-      type:Redshift.DataTypes.TIMESTAMP,
+      type:Redshift.DataTypes.TIMESTAMP, default: 'GETDATE()',
     },
     updatedat:{
-      type:Redshift.DataTypes.TIMESTAMP,
+      type:Redshift.DataTypes.TIMESTAMP, default: 'GETDATE()',
     },
   },
 };
@@ -49,6 +53,7 @@ async function assignSQLishModels(options) {
       require(path.join(modelDirPath, modelFilePath));
     const CoreDataModelSchema = Object.assign({}, modelModule.scheme);
     CoreDataModelSchema.tableProperties = Object.assign({}, CoreDataModelSchema.tableProperties, schemaDefaults[ model_type ]);
+    // CoreDataModelSchema.tableProperties.entitytype.default = CoreDataModelSchema.tableName;
     if (connection_options.table_prefix) { 
       CoreDataModelSchema.tableName = `${connection_options.table_prefix}${CoreDataModelSchema.tableName}`;
     }
