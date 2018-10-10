@@ -40,6 +40,7 @@ const schemaDefaults = {
 async function assignSQLishModels(options) {
   const { modelDirPath, periodic_db_name, db, dboptions, model_type, 
     connection_options, } = options;
+  // console.log('assignSQLishModels',{ modelDirPath, periodic_db_name, db, dboptions, model_type, connection_options, })
   let { modelFiles, } = options;
   let firstCoreDataAdapter;
   if (periodic_db_name === 'standard' && this.resources.standard_models.length) {
@@ -54,6 +55,7 @@ async function assignSQLishModels(options) {
     const CoreDataModelSchema = Object.assign({}, modelModule.scheme);
     CoreDataModelSchema.tableProperties = Object.assign({}, CoreDataModelSchema.tableProperties, schemaDefaults[ model_type ]);
     // CoreDataModelSchema.tableProperties.entitytype.default = CoreDataModelSchema.tableName;
+    // console.log('connection_options',connection_options)
     if (connection_options.table_prefix) { 
       CoreDataModelSchema.tableName = `${connection_options.table_prefix}${CoreDataModelSchema.tableName}`;
     }
@@ -116,9 +118,12 @@ async function connectRedshiftDB(options) {
 }
 
 async function connectBigQueryDB(options) {
+  // console.log('options',options)
   const { periodic_db_name, db_config_type, } = options;
   const dboptions = options.options;
   dboptions.connection_options = Object.assign({}, { logging: this.config.debug, }, dboptions.connection_options);
+  let { database, username, password, connection_options, } = dboptions;
+  // console.log('connectBigQueryDB connection_options', connection_options)
   const BigQueryDB = new BigQuery({ credentials:dboptions.connection_options, });
   const modelDirPath = getDBModelDir.call(this, {
     db_ext_name: options.extension,
@@ -135,6 +140,7 @@ async function connectBigQueryDB(options) {
     model_type:'bigquery',
     db: BigQueryDB,
     dboptions: options,
+    connection_options,
   });
 }
 
