@@ -55,7 +55,7 @@ async function assignSQLishModels(options) {
     const CoreDataModelSchema = Object.assign({}, modelModule.scheme);
     CoreDataModelSchema.tableProperties = Object.assign({}, CoreDataModelSchema.tableProperties, schemaDefaults[ model_type ]);
     // CoreDataModelSchema.tableProperties.entitytype.default = CoreDataModelSchema.tableName;
-    // console.log('connection_options',connection_options)
+    // console.log('CoreDataModelSchema',CoreDataModelSchema)
     if (connection_options.table_prefix) { 
       CoreDataModelSchema.tableName = `${connection_options.table_prefix}${CoreDataModelSchema.tableName}`;
     }
@@ -82,6 +82,8 @@ async function assignSQLishModels(options) {
       logger.silly('SYNC ERROR', e.toString());
     }
   }
+  db.__configuration = { periodic_db_name, model_type, 
+    connection_options, };
   this.dbs.set(periodic_db_name, db);
 }
 
@@ -133,6 +135,7 @@ async function connectBigQueryDB(options) {
     periodic_db_name,
   });
   const modelFiles = await fs.readdir(modelDirPath);
+  // console.log('modelFiles',modelFiles)
   return assignSQLishModels.call(this, {
     modelFiles,
     modelDirPath,
