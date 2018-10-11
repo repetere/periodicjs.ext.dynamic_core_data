@@ -13,7 +13,7 @@ const assignControllers = periodicInit.config.assignControllers;
 const fullModelFilePath = '/___FULLPATH___';
 const schemaDefaults = {
   bigquery: {
-    _id:'integer',
+    _id:'string',
     entitytype:'string',
     createdat:'timestamp',
     updatedat:'timestamp',
@@ -73,6 +73,19 @@ async function assignSQLishModels(options) {
     if (i === 0) {
       firstCoreDataAdapter = CoreConfigDataAdapter;
     }
+    // try {
+    //   CoreConfigDataAdapter.sync()
+    //     .then(syncStatus => { 
+    //       console.log({ syncStatus, });
+
+    //     })
+    //     .catch(e => {
+    //       logger.silly('SYNC ERROR', e.toString());
+
+    //     })
+    // } catch (e) {
+    //   logger.silly('SYNC ERROR', e.toString());
+    // }
   });
   if (firstCoreDataAdapter) {
     try {
