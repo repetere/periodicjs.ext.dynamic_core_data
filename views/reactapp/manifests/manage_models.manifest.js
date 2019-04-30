@@ -350,197 +350,201 @@ const modelForm = (options = {}) => {
     // hiddenFields
     asyncprops: (options.update)
       ? {
-        formdata: ['modeldata', 'data', ],
+        formdata: ['modeldata', 'data',],
         // formdata: [ 'databasedata', 'data' ],
       }
       : {},
   });
 };
 
+const dcdSettings = periodic.settings.extensions[ 'periodicjs.ext.dynamic_core_data' ];
+
 module.exports = {
-  containers: {
-    [`${reactapp.manifest_prefix}ext/dcd/manage-models/:id`]: {
-      layout: {
-        component: 'Container',
-        props: {
-          style: {
-            padding:'6rem 0',
-          },
-        },
-        children: [
-          reactappLocals.server_manifest.helpers.getPageTitle({
-            styles: {
-              // ui: {}
+  containers: (dcdSettings.use_manifests)
+    ? {
+      [ `${reactapp.manifest_prefix}ext/dcd/manage-models/:id` ]: {
+        layout: {
+          component: 'Container',
+          props: {
+            style: {
+              padding: '6rem 0',
             },
-            asynctitle:['data', 'title', ],
-            title: 'Manage Models',
-            action: {
-              type: 'modal',
-              title: 'Add Model',
-              pathname: `${reactapp.manifest_prefix}ext/dcd/add-model`,
-              buttonProps: {
-                props: {
-                  color:'isSuccess',
-                },
-              },
-            },
-          }),
-          {
-            component: 'div',
-            children: [
-              {
-                component: 'span',
-                children: 'Database: ',
-              },
-              {
-                component: 'span',
-                asyncprops: {
-                  children:['coredb', 'data', 'database_name', ],
-                },
-              },
-            ],  
           },
-          {
-            component: 'ResponsiveTable',
-            props: {
-              filterSearch: true,
-              tableSearch: true,
-              flattenRowData: true,
-              flattenRowDataOptions: { maxDepth: 3, },
-              headers: [
-                {
-                  buttons: [
-                    {
-                      passProps: {
-                        onClick: 'func:this.props.createModal',
-                        onclickThisProp:'onclickPropObject',
-                        onclickProps: {
-                          title: 'Edit Model',
-                          pathname: `${reactapp.manifest_prefix}ext/dcd/edit-model/:id`,
-                          params: [
-                            {
-                              key: ':id',
-                              val: '_id',
-                            },
-                            {
-                              key: ':type',
-                              val: 'type',
-                            },
-                          ],
-                        },
-                        buttonProps:{
-                          color: 'isInfo',
-                          buttonStyle: 'isOutlined',
-                          icon:'fa fa-pencil',
-                        },
-                      },
-                    },
-                  ],
-                  sortid: '_id',
-                  sortable:true,
-                  label: 'ID',
-                },
-                {
-                  sortable:true,
-                  sortid: 'name',
-                  label: 'Name',
-                },
-                {
-                  sortable:true,
-                  sortid: 'type',
-                  label: 'Type',
-                },
-                // {
-                //   sortable:true,
-                //   sortid: 'database_name',
-                //   label: 'Model Name',
-                // },
-                {
-                  sortable:true,
-                  sortid: 'description',
-                  label: 'Description',
-                  headerStyle: {
-                    maxWidth: 200,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+          children: [
+            reactappLocals.server_manifest.helpers.getPageTitle({
+              styles: {
+                // ui: {}
+              },
+              asynctitle: ['data', 'title',],
+              title: 'Manage Models',
+              action: {
+                type: 'modal',
+                title: 'Add Model',
+                pathname: `${reactapp.manifest_prefix}ext/dcd/add-model`,
+                buttonProps: {
+                  props: {
+                    color: 'isSuccess',
                   },
-                  columnStyle: {
-                    maxWidth: 200,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+                },
+              },
+            }),
+            {
+              component: 'div',
+              children: [
+                {
+                  component: 'span',
+                  children: 'Database: ',
+                },
+                {
+                  component: 'span',
+                  asyncprops: {
+                    children: ['coredb', 'data', 'database_name',],
                   },
                 },
               ],
             },
-            asyncprops: {
-              rows:['coredb', 'data', 'core_data_models', ],
+            {
+              component: 'ResponsiveTable',
+              props: {
+                filterSearch: true,
+                tableSearch: true,
+                flattenRowData: true,
+                flattenRowDataOptions: { maxDepth: 3, },
+                headers: [
+                  {
+                    buttons: [
+                      {
+                        passProps: {
+                          onClick: 'func:this.props.createModal',
+                          onclickThisProp: 'onclickPropObject',
+                          onclickProps: {
+                            title: 'Edit Model',
+                            pathname: `${reactapp.manifest_prefix}ext/dcd/edit-model/:id`,
+                            params: [
+                              {
+                                key: ':id',
+                                val: '_id',
+                              },
+                              {
+                                key: ':type',
+                                val: 'type',
+                              },
+                            ],
+                          },
+                          buttonProps: {
+                            color: 'isInfo',
+                            buttonStyle: 'isOutlined',
+                            icon: 'fa fa-pencil',
+                          },
+                        },
+                      },
+                    ],
+                    sortid: '_id',
+                    sortable: true,
+                    label: 'ID',
+                  },
+                  {
+                    sortable: true,
+                    sortid: 'name',
+                    label: 'Name',
+                  },
+                  {
+                    sortable: true,
+                    sortid: 'type',
+                    label: 'Type',
+                  },
+                  // {
+                  //   sortable:true,
+                  //   sortid: 'database_name',
+                  //   label: 'Model Name',
+                  // },
+                  {
+                    sortable: true,
+                    sortid: 'description',
+                    label: 'Description',
+                    headerStyle: {
+                      maxWidth: 200,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    },
+                    columnStyle: {
+                      maxWidth: 200,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    },
+                  },
+                ],
+              },
+              asyncprops: {
+                rows: ['coredb', 'data', 'core_data_models',],
+              },
             },
-          },
-        ],
+          ],
+        },
+        resources: {
+          coredb: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs/:id?format=json`,
+        },
+        pageData: {
+          title: 'Manage Models',
+          navLabel: 'Manage Models',
+        },
       },
-      resources: {
-        coredb:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs/:id?format=json`,
-      },
-      pageData: {
-        title:'Manage Models',
-        navLabel:'Manage Models',
-      },
-    },
-    [`${reactapp.manifest_prefix}ext/dcd/add-model`]: {
-      layout: {
-        component: 'Content',
-        children: [modelForm(),
-          {
-            component: 'div',
-            props: {
-              dangerouslySetInnerHTML: {
-                __html:`<style>
+      [ `${reactapp.manifest_prefix}ext/dcd/add-model` ]: {
+        layout: {
+          component: 'Content',
+          children: [modelForm(),
+            {
+              component: 'div',
+              props: {
+                dangerouslySetInnerHTML: {
+                  __html: `<style>
                 .__re-bulma_modal-card{
                   width:auto;
                 }
                 </style>`,
+                },
               },
             },
-          },
-        ],
+          ],
+        },
+        resources: {
+          // databasedata: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels/:id?format=json`,
+        },
+        pageData: {
+          title: 'Add a Model',
+          navLabel: 'Add a Model',
+        },
       },
-      resources: {
-        // databasedata: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels/:id?format=json`,
-      },
-      pageData: {
-        title:'Add a Model',
-        navLabel:'Add a Model',
-      },
-    },
-    [`${reactapp.manifest_prefix}ext/dcd/edit-model/:id`]: {
-      layout: {
-        component: 'Content',
-        children: [modelForm({ update: true, }),
-          {
-            component: 'div',
-            props: {
-              dangerouslySetInnerHTML: {
-                __html:`<style>
+      [ `${reactapp.manifest_prefix}ext/dcd/edit-model/:id` ]: {
+        layout: {
+          component: 'Content',
+          children: [modelForm({ update: true, }),
+            {
+              component: 'div',
+              props: {
+                dangerouslySetInnerHTML: {
+                  __html: `<style>
                 .__re-bulma_modal-card{
                   width:auto;
                 }
                 </style>`,
+                },
               },
             },
-          },
-        ],
+          ],
+        },
+        resources: {
+          modeldata: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels/:id?format=json`,
+        },
+        pageData: {
+          title: 'Add a Model',
+          navLabel: 'Add a Model',
+        },
       },
-      resources: {
-        modeldata: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatamodels/:id?format=json`,
-      },
-      pageData: {
-        title:'Add a Model',
-        navLabel:'Add a Model',
-      },
-    },
-    // [`${reactapp.manifest_prefix}ext/dcd/edit-model/lowkie/:id`]: getEditForm({form:lowkieForm({ update: true, })}),
-    // [`${reactapp.manifest_prefix}ext/dcd/edit-model/mongo/:id`]: getEditForm({form:mongoForm({ update: true, })}),
-    // [`${reactapp.manifest_prefix}ext/dcd/edit-model/sql/:id`]: getEditForm({form:sqlForm({ update: true, })}),
-  },
+      // [`${reactapp.manifest_prefix}ext/dcd/edit-model/lowkie/:id`]: getEditForm({form:lowkieForm({ update: true, })}),
+      // [`${reactapp.manifest_prefix}ext/dcd/edit-model/mongo/:id`]: getEditForm({form:mongoForm({ update: true, })}),
+      // [`${reactapp.manifest_prefix}ext/dcd/edit-model/sql/:id`]: getEditForm({form:sqlForm({ update: true, })}),
+    }
+    : {},
 };
 // console.log('modelForm({ update: true, })', util.inspect(Object.assign({}, modelForm({ update: true, }),{ bindprops: true }), { depth: 7 }));

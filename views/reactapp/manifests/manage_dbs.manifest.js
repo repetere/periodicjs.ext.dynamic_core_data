@@ -373,133 +373,62 @@ const getEditForm = (options = {}) => ({
     navLabel:'Edit Database',
   },
 }); 
+const dcdSettings = periodic.settings.extensions[ 'periodicjs.ext.dynamic_core_data' ];
 
 module.exports = {
-  containers: {
-    [`${reactapp.manifest_prefix}ext/dcd/manage-databases`]: {
-      layout: {
-        component: 'Container',
-        props: {
-          style: {
-            padding:'6rem 0',
-          },
-        },
-        children: [
-          reactappLocals.server_manifest.helpers.getPageTitle({
-            styles: {
-              // ui: {}
+  containers: (dcdSettings.use_manifests)
+    ? {
+      [ `${reactapp.manifest_prefix}ext/dcd/manage-databases` ]: {
+        layout: {
+          component: 'Container',
+          props: {
+            style: {
+              padding: '6rem 0',
             },
-            title: 'Manage Databases',
-            action: [
-              {
-                type: 'modal',
-                title: 'Add Database',
-                pathname: `${reactapp.manifest_prefix}ext/dcd/add-database`,
-                buttonProps: {
-                  props: {
-                    color:'isSuccess',
-                  },
-                },
+          },
+          children: [
+            reactappLocals.server_manifest.helpers.getPageTitle({
+              styles: {
+                // ui: {}
               },
-              {
-                type: 'modal',
-                title: 'Add Model',
-                pathname: `${reactapp.manifest_prefix}ext/dcd/add-model`,
-                buttonProps: {
-                  props: {
-                    color:'isSuccess',
-                  },
-                },
-              },
-            ],
-          }),
-          reactappLocals.server_manifest.table.getTable({
-            schemaName: 'dynamicdb_coredatadbs',
-            baseUrl:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
-            asyncdataprops: 'databases',
-            headers: [
-              {
-                buttons: [
-                  {
-                    passProps: {
-                      onClick: 'func:this.props.createModal',
-                      onclickThisProp:'onclickPropObject',
-                      onclickProps: {
-                        title: 'Edit Database',
-                        pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
-                        params: [
-                          {
-                            key: ':id',
-                            val: '_id',
-                          },
-                          {
-                            key: ':type',
-                            val: 'type',
-                          },
-                        ],
-                      },
-                      buttonProps:{
-                        color: 'isInfo',
-                        buttonStyle: 'isOutlined',
-                        icon:'fa fa-pencil',
-                      },
+              title: 'Manage Databases',
+              action: [
+                {
+                  type: 'modal',
+                  title: 'Add Database',
+                  pathname: `${reactapp.manifest_prefix}ext/dcd/add-database`,
+                  buttonProps: {
+                    props: {
+                      color: 'isSuccess',
                     },
                   },
-                ],
-                sortid: '_id',
-                sortable:true,
-                label: 'ID',
-              },
-              {
-                sortable:true,
-                sortid: 'database_name',
-                label: 'Database Name',
-              },
-              {
-                sortable:true,
-                sortid: 'type',
-                label: 'Type',
-              },
-              {
-                sortable:true,
-                sortid: 'description',
-                label: 'Description',
-                headerStyle: {
-                  maxWidth: 200,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
                 },
-                columnStyle: {
-                  maxWidth: 200,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                },
-              },
-              {
-                sortid:'core_data_models',
-                label: 'Edit Models',
-                customCellLayout: {
-                  component: 'DynamicLayout',
-                  thisprops: {
-                    items:['cell', ],
+                {
+                  type: 'modal',
+                  title: 'Add Model',
+                  pathname: `${reactapp.manifest_prefix}ext/dcd/add-model`,
+                  buttonProps: {
+                    props: {
+                      color: 'isSuccess',
+                    },
                   },
-                  bindprops: true,
-                  props: {
-                    layout: {
-                      bindprops:true,
-                      component: 'ResponsiveButton',
-                      thisprops: {
-                        _children:['name', ],
-                      },
-                      props: {
-                        style: {
-                          marginRight: '0.5rem',
-                        },
+                },
+              ],
+            }),
+            reactappLocals.server_manifest.table.getTable({
+              schemaName: 'dynamicdb_coredatadbs',
+              baseUrl: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
+              asyncdataprops: 'databases',
+              headers: [
+                {
+                  buttons: [
+                    {
+                      passProps: {
                         onClick: 'func:this.props.createModal',
-                        // onclickThisProp:'onclickPropObject',
+                        onclickThisProp: 'onclickPropObject',
                         onclickProps: {
-                          title: 'Edit Model',
-                          pathname: `${reactapp.manifest_prefix}ext/dcd/edit-model/:id`,
+                          title: 'Edit Database',
+                          pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
                           params: [
                             {
                               key: ':id',
@@ -511,84 +440,158 @@ module.exports = {
                             },
                           ],
                         },
-                        buttonProps:{
+                        buttonProps: {
                           color: 'isInfo',
                           buttonStyle: 'isOutlined',
-                          icon:'fa fa-database',
+                          icon: 'fa fa-pencil',
+                        },
+                      },
+                    },
+                  ],
+                  sortid: '_id',
+                  sortable: true,
+                  label: 'ID',
+                },
+                {
+                  sortable: true,
+                  sortid: 'database_name',
+                  label: 'Database Name',
+                },
+                {
+                  sortable: true,
+                  sortid: 'type',
+                  label: 'Type',
+                },
+                {
+                  sortable: true,
+                  sortid: 'description',
+                  label: 'Description',
+                  headerStyle: {
+                    maxWidth: 200,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  },
+                  columnStyle: {
+                    maxWidth: 200,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  },
+                },
+                {
+                  sortid: 'core_data_models',
+                  label: 'Edit Models',
+                  customCellLayout: {
+                    component: 'DynamicLayout',
+                    thisprops: {
+                      items: [ 'cell', ],
+                    },
+                    bindprops: true,
+                    props: {
+                      layout: {
+                        bindprops: true,
+                        component: 'ResponsiveButton',
+                        thisprops: {
+                          _children: [ 'name', ],
+                        },
+                        props: {
+                          style: {
+                            marginRight: '0.5rem',
+                          },
+                          onClick: 'func:this.props.createModal',
+                          // onclickThisProp:'onclickPropObject',
+                          onclickProps: {
+                            title: 'Edit Model',
+                            pathname: `${reactapp.manifest_prefix}ext/dcd/edit-model/:id`,
+                            params: [
+                              {
+                                key: ':id',
+                                val: '_id',
+                              },
+                              {
+                                key: ':type',
+                                val: 'type',
+                              },
+                            ],
+                          },
+                          buttonProps: {
+                            color: 'isInfo',
+                            buttonStyle: 'isOutlined',
+                            icon: 'fa fa-database',
+                          },
                         },
                       },
                     },
                   },
+                  // buttons: [
+                  //   {
+                  //     passProps: {
+                  //       onClick: 'func:this.props.reduxRouter.push',
+                  //       onclickBaseUrl: `${reactapp.manifest_prefix}ext/dcd/manage-models/:id`,
+                  //       onclickLinkParams: [
+                  //         {
+                  //           key: ':id',
+                  //           val: '_id',
+                  //         },
+                  //         // {
+                  //         //   key: ':type',
+                  //         //   val: 'type',
+                  //         // },
+                  //       ],
+                  //       // onclickThisProp:'onclickPropObject',
+                  //       // onclickProps: {
+                  //       //   title: 'Edit Database',
+                  //       //   pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
+                  //       //   params: [
+                  //       //     {
+                  //       //       key: ':id',
+                  //       //       val: '_id',
+                  //       //     },
+                  //       //     {
+                  //       //       key: ':type',
+                  //       //       val: 'type',
+                  //       //     },
+                  //       //   ],
+                  //       // },
+                  //       buttonProps:{
+                  //         color: 'isInfo',
+                  //         buttonStyle: 'isOutlined',
+                  //         icon:'fa fa-database',
+                  //         children:'Edit Models',
+                  //       },
+                  //       children:'Edit Models',
+                  //     },
+                  //   }
+                  // ],
                 },
-                // buttons: [
-                //   {
-                //     passProps: {
-                //       onClick: 'func:this.props.reduxRouter.push',
-                //       onclickBaseUrl: `${reactapp.manifest_prefix}ext/dcd/manage-models/:id`,
-                //       onclickLinkParams: [
-                //         {
-                //           key: ':id',
-                //           val: '_id',
-                //         },
-                //         // {
-                //         //   key: ':type',
-                //         //   val: 'type',
-                //         // },
-                //       ],
-                //       // onclickThisProp:'onclickPropObject',
-                //       // onclickProps: {
-                //       //   title: 'Edit Database',
-                //       //   pathname: `${reactapp.manifest_prefix}ext/dcd/edit-database/:type/:id`,
-                //       //   params: [
-                //       //     {
-                //       //       key: ':id',
-                //       //       val: '_id',
-                //       //     },
-                //       //     {
-                //       //       key: ':type',
-                //       //       val: 'type',
-                //       //     },
-                //       //   ],
-                //       // },
-                //       buttonProps:{
-                //         color: 'isInfo',
-                //         buttonStyle: 'isOutlined',
-                //         icon:'fa fa-database',
-                //         children:'Edit Models',
-                //       },
-                //       children:'Edit Models',
-                //     },
-                //   }
-                // ],
-              },
-            ],
-          }),
-        ],
+              ],
+            }),
+          ],
+        },
+        resources: {
+          databases: `${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
+        },
+        pageData: {
+          title: 'Manage Databases',
+          navLabel: 'Manage Databases',
+        },
       },
-      resources: {
-        databases:`${reactapp.manifest_prefix}contentdata/dynamicdb_coredatadbs?format=json`,
+      [ `${reactapp.manifest_prefix}ext/dcd/add-database` ]: {
+        layout: {
+          component: 'Content',
+          children: [ databaseForm(), ],
+        },
+        resources: {},
+        pageData: {
+          title: 'Add a Database',
+          navLabel: 'Add a Database',
+        },
       },
-      pageData: {
-        title:'Manage Databases',
-        navLabel:'Manage Databases',
-      },
-    },
-    [`${reactapp.manifest_prefix}ext/dcd/add-database`]: {
-      layout: {
-        component: 'Content',
-        children:[databaseForm(), ],
-      },
-      resources: {},
-      pageData: {
-        title:'Add a Database',
-        navLabel:'Add a Database',
-      },
-    },
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id`]: getEditForm({ form:lowkieForm({ update: true, }),  }),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/mongoose/:id`]: getEditForm({ form:mongoForm({ update: true, }), }),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/sequelize/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/redshift/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
-    [`${reactapp.manifest_prefix}ext/dcd/edit-database/bigquery/:id`]: getEditForm({ form:sqlForm({ update: true, }), }),
-  },
+      [ `${reactapp.manifest_prefix}ext/dcd/edit-database/lowkie/:id` ]: getEditForm({ form: lowkieForm({ update: true, }), }),
+      [ `${reactapp.manifest_prefix}ext/dcd/edit-database/mongoose/:id` ]: getEditForm({ form: mongoForm({ update: true, }), }),
+      [ `${reactapp.manifest_prefix}ext/dcd/edit-database/sequelize/:id` ]: getEditForm({ form: sqlForm({ update: true, }), }),
+      [ `${reactapp.manifest_prefix}ext/dcd/edit-database/redshift/:id` ]: getEditForm({ form: sqlForm({ update: true, }), }),
+      [ `${reactapp.manifest_prefix}ext/dcd/edit-database/bigquery/:id` ]: getEditForm({ form: sqlForm({ update: true, }), }),
+    }
+    : {},
 };
 // console.log('databaseForm({ update: true, })', util.inspect(Object.assign({}, databaseForm({ update: true, }),{ bindprops: true }), { depth: 7 }));
